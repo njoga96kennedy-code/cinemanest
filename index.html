@@ -1,212 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KENFLIX</title>
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
-body{background:#141414;color:white;overflow-x:hidden;}
-
-/* NAV */
-.nav{
-position:fixed;top:0;width:100%;
-display:flex;justify-content:space-between;
-padding:15px 40px;z-index:1000;
-transition:0.3s;
-}
-.nav.scrolled{background:#111;}
-.logo{color:#e50914;font-size:28px;font-weight:bold;}
-.search{
-background:rgba(0,0,0,0.6);
-border:none;padding:10px 15px;
-border-radius:20px;color:white;
-outline:none;
-}
-
-/* HERO */
-.hero{
-height:90vh;
-display:flex;
-align-items:flex-end;
-padding:60px;
-background-size:cover;
-position:relative;
-}
-.hero::after{
-content:"";position:absolute;bottom:0;width:100%;height:40%;
-background:linear-gradient(to top,#141414,transparent);
-}
-.hero-content{z-index:2;max-width:600px;}
-.hero h1{font-size:60px;}
-.hero p{color:#ddd;margin:15px 0;}
-
-/* ROW */
-.row{
-margin-top:40px;
-padding:0 40px;
-margin-bottom:50px;
-}
-.row h2{
-font-size:26px;
-margin-bottom:15px;
-font-weight:600;
-}
-.row::before{
-content:"";
-display:block;
-height:1px;
-background:rgba(255,255,255,0.1);
-margin-bottom:20px;
-}
-
-/* ROW CONTAINER */
-.row-container{position:relative;}
-
-/* SCROLL */
-.row-posters{
-display:flex;
-gap:14px;
-overflow-x:auto;
-scroll-behavior:smooth;
-padding:20px 0;
-scroll-snap-type:x mandatory;
-}
-.row-posters::-webkit-scrollbar{display:none;}
-
-/* LANDSCAPE */
-.poster-landscape{
-width:260px;height:150px;
-border-radius:8px;
-overflow:hidden;
-cursor:pointer;
-transition:0.3s;
-flex-shrink:0;
-position:relative;
-scroll-snap-align:start;
-}
-.poster-landscape img{
-width:100%;height:100%;object-fit:cover;
-}
-.poster-landscape:hover{
-transform:scale(1.15);
-z-index:10;
-}
-
-/* PORTRAIT */
-.poster-portrait{
-width:160px;height:240px;
-border-radius:8px;
-overflow:hidden;
-cursor:pointer;
-transition:0.3s;
-flex-shrink:0;
-position:relative;
-scroll-snap-align:start;
-}
-.poster-portrait img{
-width:100%;height:100%;object-fit:cover;
-}
-.poster-portrait:hover{
-transform:scale(1.15);
-z-index:10;
-}
-
-/* OVERLAY */
-.overlay{
-position:absolute;
-bottom:0;left:0;width:100%;
-padding:10px;
-background:linear-gradient(to top,rgba(0,0,0,0.9),transparent);
-font-size:12px;
-opacity:0;
-transition:0.3s;
-}
-.poster-landscape:hover .overlay,
-.poster-portrait:hover .overlay{
-opacity:1;
-}
-
-/* ARROWS */
-.arrow{
-position:absolute;
-top:50%;
-transform:translateY(-50%);
-font-size:40px;
-background:rgba(0,0,0,0.7);
-padding:12px;
-cursor:pointer;
-z-index:20;
-border-radius:50%;
-transition:0.3s;
-}
-.left{left:10px;}
-.right{right:10px;}
-.arrow:hover{background:#e50914;}
-
-@media(max-width:768px){
-.hero{height:70vh;padding:20px;}
-.hero h1{font-size:30px;}
-.poster-landscape{width:180px;height:110px;}
-.poster-portrait{width:120px;height:180px;}
-.arrow{display:none;}
-}
-</style>
-</head>
-
-<body>
-
-<div class="nav" id="nav">
-<div class="logo">KENFLIX</div>
-<input type="text" id="search" class="search" placeholder="Search...">
-</div>
-
-<div class="hero" id="hero">
-<div class="hero-content">
-<h1 id="hero-title">Loading...</h1>
-<p id="hero-desc"></p>
-</div>
-</div>
-
-<!-- ROWS -->
-
-<div class="row">
-<h2>🔥 Trending Now</h2>
-<div class="row-container">
-<div class="arrow left" onclick="scrollRow('trending',-1)">‹</div>
-<div class="arrow right" onclick="scrollRow('trending',1)">›</div>
-<div class="row-posters" id="trending"></div>
-</div>
-</div>
-
-<div class="row">
-<h2>⭐ Top Rated</h2>
-<div class="row-container">
-<div class="arrow left" onclick="scrollRow('top',-1)">‹</div>
-<div class="arrow right" onclick="scrollRow('top',1)">›</div>
-<div class="row-posters" id="top"></div>
-</div>
-</div>
-
-<div class="row">
-<h2>💥 Action Movies</h2>
-<div class="row-container">
-<div class="arrow left" onclick="scrollRow('action',-1)">‹</div>
-<div class="arrow right" onclick="scrollRow('action',1)">›</div>
-<div class="row-posters" id="action"></div>
-</div>
-</div>
-
-<div class="row">
-<h2>📺 TV Shows</h2>
-<div class="row-container">
-<div class="arrow left" onclick="scrollRow('tv',-1)">‹</div>
-<div class="arrow right" onclick="scrollRow('tv',1)">›</div>
-<div class="row-posters" id="tv"></div>
-</div>
-</div>
-
 <script>
 
 const API_KEY="1d3ae144acfb6bfcb25f70361cedcf29";
@@ -215,91 +6,157 @@ const IMG="https://image.tmdb.org/t/p/original";
 
 /* NAV */
 window.addEventListener("scroll",()=>{
-nav.classList.toggle("scrolled",window.scrollY>50);
+document.getElementById("nav")
+.classList.toggle("scrolled",window.scrollY>50);
 });
 
 /* HERO */
 async function loadHero(){
-const res=await fetch(`${API}/trending/movie/week?api_key=${API_KEY}`);
-const data=await res.json();
-const m=data.results[Math.floor(Math.random()*data.results.length)];
 
-hero.style.backgroundImage=`url(${IMG+m.backdrop_path})`;
-hero-title.innerText=m.title;
-hero-desc.innerText=m.overview;
+const res=await fetch(
+`${API}/trending/movie/week?api_key=${API_KEY}`
+);
+
+const data=await res.json();
+
+const m=data.results[
+Math.floor(Math.random()*data.results.length)
+];
+
+document.getElementById("hero").style.backgroundImage =
+`url(${IMG+m.backdrop_path})`;
+
+document.getElementById("hero-title").innerText = m.title;
+
+document.getElementById("hero-desc").innerText =
+m.overview;
+
 }
 
-/* FETCH */
+/* FETCH ROW */
 async function fetchRow(url,container,type,style){
+
 const res=await fetch(url);
 const data=await res.json();
 
 container.innerHTML="";
 
 data.results.forEach(item=>{
-if(!item.poster_path&&!item.backdrop_path)return;
+
+if(!item.poster_path && !item.backdrop_path) return;
 
 const div=document.createElement("div");
-div.classList.add(style==="landscape"?"poster-landscape":"poster-portrait");
 
-const imgPath=style==="landscape"?item.backdrop_path:item.poster_path;
+div.classList.add(
+style==="landscape"
+? "poster-landscape"
+: "poster-portrait"
+);
+
+const imgPath=
+style==="landscape"
+? item.backdrop_path
+: item.poster_path;
 
 div.innerHTML=`
 <img src="${IMG+imgPath}">
-<div class="overlay">${item.title||item.name}</div>
+<div class="overlay">${item.title || item.name}</div>
 `;
 
 div.onclick=()=>{
-window.location.href=`watch.html?id=${item.id}&type=${type}`;
+window.location.href=
+`watch.html?id=${item.id}&type=${type}`;
 };
 
 container.appendChild(div);
+
 });
+
 }
 
 /* SCROLL */
 function scrollRow(id,dir){
-document.getElementById(id).scrollBy({left:dir*500,behavior:"smooth"});
+
+document.getElementById(id).scrollBy({
+left:dir*500,
+behavior:"smooth"
+});
+
 }
 
 /* SEARCH */
-search.addEventListener("keyup",async(e)=>{
-const q=e.target.value;
-if(q.length<2)return;
+document.getElementById("search")
+.addEventListener("keyup",async(e)=>{
 
-const res=await fetch(`${API}/search/multi?api_key=${API_KEY}&query=${q}`);
+const q=e.target.value;
+
+if(q.length<2) return;
+
+const res=await fetch(
+`${API}/search/multi?api_key=${API_KEY}&query=${q}`
+);
+
 const data=await res.json();
+
+const trending=document.getElementById("trending");
 
 trending.innerHTML="";
 
 data.results.forEach(item=>{
-if(!item.poster_path)return;
+
+if(!item.poster_path) return;
 
 const div=document.createElement("div");
+
 div.classList.add("poster-portrait");
 
 div.innerHTML=`
 <img src="${IMG+item.poster_path}">
-<div class="overlay">${item.title||item.name}</div>
+<div class="overlay">${item.title || item.name}</div>
 `;
 
 div.onclick=()=>{
-window.location.href=`watch.html?id=${item.id}&type=${item.media_type==="tv"?"tv":"movie"}`;
+window.location.href=
+`watch.html?id=${item.id}&type=${
+item.media_type==="tv"?"tv":"movie"
+}`;
 };
 
 trending.appendChild(div);
+
 });
+
 });
 
 /* LOAD */
 loadHero();
 
-fetchRow(`${API}/trending/movie/week?api_key=${API_KEY}`,trending,"movie","landscape");
-fetchRow(`${API}/movie/top_rated?api_key=${API_KEY}`,top,"movie","portrait");
-fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=28`,action,"movie","portrait");
-fetchRow(`${API}/tv/popular?api_key=${API_KEY}`,tv,"tv","landscape");
+fetchRow(
+`${API}/trending/movie/week?api_key=${API_KEY}`,
+document.getElementById("trending"),
+"movie",
+"landscape"
+);
+
+fetchRow(
+`${API}/movie/top_rated?api_key=${API_KEY}`,
+document.getElementById("top"),
+"movie",
+"portrait"
+);
+
+fetchRow(
+`${API}/discover/movie?api_key=${API_KEY}&with_genres=28`,
+document.getElementById("action"),
+"movie",
+"portrait"
+);
+
+fetchRow(
+`${API}/tv/popular?api_key=${API_KEY}`,
+document.getElementById("tv"),
+"tv",
+"landscape"
+);
 
 </script>
-
-</body>
-</html>
