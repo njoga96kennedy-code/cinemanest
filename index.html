@@ -1,319 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>MovieFlix</title>
 
 <style>
 body {
-  margin: 0;
-  background: #141414;
-  color: white;
-  font-family: Arial;
-}
-
-/* NAV */
-header {
-  position: fixed;
-  width: 100%;
-  padding: 10px;
-  background: rgba(0,0,0,0.9);
-  display: flex;
-  justify-content: space-between;
-  z-index: 100;
-}
-
-.logo {
-  color: red;
-  font-size: 20px;
-}
-
-.controls {
-  display: flex;
-  gap: 5px;
-}
-
-select, input {
-  padding: 5px;
-  font-size: 12px;
-  background: black;
-  color: white;
-  border: 1px solid gray;
-}
-
-/* HERO */
-.hero {
-  height: 60vh;
-  background-size: cover;
-  display: flex;
-  align-items: flex-end;
-  padding: 20px;
-}
-
-/* ROW */
-.row {
-  padding-left: 10px;
-  margin-top: 10px;
-}
-
-.row-posters {
-  display: flex;
-  overflow-x: auto;
-}
-
-/* POSTER */
-.poster-container {
-  margin-right: 8px;
-  cursor: pointer;
+  background:black;
+  color:white;
+  font-family:Arial;
 }
 
 .poster {
-  width: 120px;
+  width:150px;
+  cursor:pointer;
+  margin:10px;
 }
 
-/* DESKTOP */
-@media (min-width: 768px) {
-  .poster {
-    width: 200px;
-  }
-}
-
-/* MODAL */
 #modal {
-  position: fixed;
+  position:fixed;
   width:100%;
   height:100%;
-  background: black;
+  background:black;
   display:none;
-  flex-direction: column;
-  z-index: 200;
+  top:0;
+  left:0;
 }
 
-#player {
-  width: 100%;
-  height: 60%;
-  border: none;
-}
-
-/* PANEL */
-#episodePanel {
-  padding: 10px;
-  background: #111;
-}
-
-#episodePanel select {
-  width: 100%;
-  margin-bottom: 5px;
-}
-
-button {
-  padding: 10px;
-  border: none;
-  background: red;
-  color: white;
+iframe {
+  width:100%;
+  height:80%;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <div class="logo">MovieFlix</div>
-  <div class="controls">
-    <select id="type">
-      <option value="movie">Movies</option>
-      <option value="tv">Series</option>
-    </select>
-    <input id="search" placeholder="Search">
-  </div>
-</header>
+<h2>Click Movie Test</h2>
 
-<div class="hero" id="hero"></div>
-<div id="rows"></div>
+<img 
+  class="poster"
+  id="movie"
+  src="https://image.tmdb.org/t/p/w300/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg"
+/>
 
-<!-- PLAYER -->
 <div id="modal">
-  <button onclick="closePlayer()">Close</button>
-  <iframe 
-    id="player"
-    allow="autoplay; fullscreen"
-    allowfullscreen>
-  </iframe>
-
-  <div id="episodePanel" style="display:none;">
-    <select id="season"></select>
-    <select id="episode"></select>
-    <button onclick="loadEpisode()">Play Episode</button>
-  </div>
+  <button id="closeBtn">Close</button>
+  <iframe id="player" allow="autoplay; fullscreen"></iframe>
 </div>
 
 <script>
-const API_KEY = "1d3ae144acfb6bfcb25f70361cedcf29";
-const STREAM_KEY = "nx_a6c5083f70bde5a7b4c2dec92de375ac";
-const BASE = "https://api.themoviedb.org/3";
+document.addEventListener("DOMContentLoaded", function() {
 
-let type = "movie";
-let currentId = null;
+  console.log("JS LOADED ✅");
 
-/* TYPE SWITCH */
-document.getElementById("type").addEventListener("change", () => {
-  type = document.getElementById("type").value;
-  loadAll();
-});
+  const STREAM_KEY = "nx_a6c5083f70bde5a7b4c2dec92de375ac";
 
-/* HERO */
-async function loadHero() {
-  const res = await fetch(`${BASE}/trending/${type}/day?api_key=${API_KEY}`);
-  const data = await res.json();
-  const m = data.results[0];
-
-  document.getElementById("hero").style.backgroundImage =
-    `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
-
-  document.getElementById("hero").innerHTML = `<h2>${m.title || m.name}</h2>`;
-}
-
-/* ROW */
-async function createRow(title, url) {
-  const res = await fetch(url);
-  const data = await res.json();
-
-  return `
-    <div class="row">
-      <h3>${title}</h3>
-      <div class="row-posters">
-        ${data.results.slice(0,10).map(m=>`
-          <div class="poster-container" data-id="${m.id}">
-            <img class="poster" src="https://image.tmdb.org/t/p/w300${m.poster_path}">
-          </div>
-        `).join("")}
-      </div>
-    </div>
-  `;
-}
-
-/* ATTACH CLICK EVENTS */
-function attachClickEvents() {
-  document.querySelectorAll(".poster-container").forEach(el => {
-    el.addEventListener("click", () => {
-      const id = el.getAttribute("data-id");
-      openPlayer(id);
-    });
-  });
-}
-
-/* LOAD ROWS */
-async function loadRows() {
-  const rows = document.getElementById("rows");
-
-  const trending = await createRow("Trending", `${BASE}/trending/${type}/day?api_key=${API_KEY}`);
-  const topRated = await createRow("Top Rated", `${BASE}/${type}/top_rated?api_key=${API_KEY}`);
-  const comedy = await createRow("Comedy", `${BASE}/discover/${type}?api_key=${API_KEY}&with_genres=35`);
-
-  rows.innerHTML = trending + topRated + comedy;
-
-  attachClickEvents();
-}
-
-/* OPEN PLAYER */
-function openPlayer(id) {
-  currentId = id;
-
+  const movie = document.getElementById("movie");
   const modal = document.getElementById("modal");
   const player = document.getElementById("player");
+  const closeBtn = document.getElementById("closeBtn");
 
-  modal.style.display = "flex";
-  player.src = "";
+  movie.addEventListener("click", () => {
+    console.log("CLICK WORKING ✅");
 
-  setTimeout(() => {
-    if(type === "movie") {
-      document.getElementById("episodePanel").style.display = "none";
-      player.src =
-        `https://api.codespecters.com/embed/movie/${id}?apikey=${STREAM_KEY}`;
-    } else {
-      document.getElementById("episodePanel").style.display = "block";
-      loadSeasons(id);
-    }
-  }, 100);
-}
+    modal.style.display = "block";
 
-/* CLOSE */
-function closePlayer() {
-  document.getElementById("modal").style.display = "none";
-  document.getElementById("player").src = "";
-}
+    player.src =
+      `https://api.codespecters.com/embed/movie/550?apikey=${STREAM_KEY}`;
+  });
 
-/* SEASONS */
-async function loadSeasons(id) {
-  const res = await fetch(`${BASE}/tv/${id}?api_key=${API_KEY}`);
-  const data = await res.json();
+  closeBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+    player.src = "";
+  });
 
-  const seasonSelect = document.getElementById("season");
-
-  seasonSelect.innerHTML = data.seasons.map(s =>
-    `<option value="${s.season_number}">Season ${s.season_number}</option>`
-  ).join("");
-
-  loadEpisodes();
-}
-
-/* EPISODES */
-async function loadEpisodes() {
-  const season = document.getElementById("season").value;
-
-  const res = await fetch(`${BASE}/tv/${currentId}/season/${season}?api_key=${API_KEY}`);
-  const data = await res.json();
-
-  const episodeSelect = document.getElementById("episode");
-
-  episodeSelect.innerHTML = data.episodes.map(e =>
-    `<option value="${e.episode_number}">Episode ${e.episode_number}</option>`
-  ).join("");
-}
-
-/* PLAY EPISODE */
-function loadEpisode() {
-  const season = document.getElementById("season").value;
-  const episode = document.getElementById("episode").value;
-
-  document.getElementById("player").src =
-    `https://api.codespecters.com/embed/tv/${currentId}/${season}/${episode}?apikey=${STREAM_KEY}`;
-}
-
-document.getElementById("season").addEventListener("change", loadEpisodes);
-
-/* SEARCH */
-document.getElementById("search").addEventListener("input", async e => {
-  const q = e.target.value;
-
-  if (!q) return loadRows();
-
-  const res = await fetch(`${BASE}/search/${type}?api_key=${API_KEY}&query=${q}`);
-  const data = await res.json();
-
-  document.getElementById("rows").innerHTML = `
-    <div class="row">
-      <h3>Results</h3>
-      <div class="row-posters">
-        ${data.results.map(m=>`
-          <div class="poster-container" data-id="${m.id}">
-            <img class="poster" src="https://image.tmdb.org/t/p/w300${m.poster_path}">
-          </div>
-        `).join("")}
-      </div>
-    </div>
-  `;
-
-  attachClickEvents();
 });
-
-/* INIT */
-async function loadAll() {
-  await loadHero();
-  await loadRows();
-}
-
-loadAll();
 </script>
 
 </body>
