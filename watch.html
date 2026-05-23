@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watch — Cinema Nest</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#e50914;
+  --bg:#0a0a0a;
+  --surface:#141414;
+  --surface2:#1e1e1e;
+  --text:#fff;
+  --muted:#aaa;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+.topbar{
+  display:flex;align-items:center;gap:16px;
+  padding:14px 32px;
+  background:rgba(10,10,10,.95);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  position:sticky;top:0;z-index:100;
+}
+.back-btn{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);padding:8px 16px;border-radius:24px;
+  font-size:13px;cursor:pointer;font-family:inherit;
+  transition:background .2s;text-decoration:none;white-space:nowrap;
+}
+.back-btn:hover{background:rgba(255,255,255,.15);}
+.back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red);letter-spacing:2px;margin-right:auto;}
+.watch-title{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px;}
+
+/* PLAYER */
+.player-wrap{
+  position:relative;background:#000;
+  width:100%;aspect-ratio:16/9;max-height:78vh;overflow:hidden;
+}
+.player-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+
+.player-overlay{
+  position:absolute;inset:0;z-index:5;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;background:#000;
+  transition:opacity .5s;
+}
+.player-overlay.hidden{opacity:0;pointer-events:none;}
+.spinner{
+  width:48px;height:48px;
+  border:3px solid rgba(255,255,255,.1);
+  border-top-color:var(--red);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--muted);}
+
+.error-state{display:none;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:24px;}
+.error-state.show{display:flex;}
+.error-icon{font-size:40px;}
+.error-msg{font-size:14px;color:var(--muted);max-width:300px;line-height:1.6;}
+.retry-btn{
+  background:var(--red);color:#fff;border:none;
+  padding:10px 24px;border-radius:4px;font-size:14px;
+  cursor:pointer;font-family:inherit;font-weight:600;
+}
+
+/* SOURCE BUTTONS */
+.source-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 32px;background:rgba(20,20,20,.9);
+  border-bottom:1px solid rgba(255,255,255,.05);
+  flex-wrap:wrap;
+}
+.source-label{font-size:12px;color:var(--muted);margin-right:4px;white-space:nowrap;}
+.src-btn{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  color:var(--muted);padding:6px 14px;border-radius:20px;
+  font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.src-btn:hover{background:rgba(255,255,255,.13);color:var(--text);}
+.src-btn.active{background:var(--red);color:#fff;border-color:var(--red);}
+
+/* CONTENT */
+.content{
+  display:grid;grid-template-columns:1fr 340px;
+  gap:32px;padding:32px;max-width:1400px;margin:0 auto;
+}
+@media(max-width:900px){
+  .content{grid-template-columns:1fr;padding:20px;}
+  .watch-title{max-width:150px;}
+  .topbar{padding:12px 20px;}
+  .source-bar{padding:10px 20px;}
+}
+
+.movie-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(28px,5vw,48px);letter-spacing:1px;margin-bottom:8px;
+}
+.movie-meta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-bottom:16px;}
+.badge{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.badge-red{background:var(--red);color:#fff;}
+.badge-gold{background:rgba(245,197,24,.15);color:#f5c518;}
+.movie-overview{font-size:14px;line-height:1.75;color:#bbb;margin-bottom:24px;}
+
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+.btn-secondary{
+  background:rgba(255,255,255,.10);color:#fff;
+  border:1px solid rgba(255,255,255,.15);
+  padding:10px 18px;border-radius:4px;font-size:13px;font-weight:500;
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;
+  transition:background .2s;
+}
+.btn-secondary:hover{background:rgba(255,255,255,.18);}
+.btn-secondary svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+
+/* SEASONS */
+.seasons-section{margin-bottom:24px;}
+.section-heading{font-size:16px;font-weight:600;margin-bottom:12px;}
+.season-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.season-tab{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  color:var(--muted);padding:6px 14px;border-radius:20px;
+  font-size:12px;cursor:pointer;font-family:inherit;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.season-tab.active,.season-tab:hover{background:var(--red);color:#fff;border-color:var(--red);}
+.episodes-grid{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
+.episode-item{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;
+  background:var(--surface2);cursor:pointer;border:1px solid transparent;transition:background .2s,border-color .2s;
+}
+.episode-item:hover,.episode-item.active{background:rgba(229,9,20,.1);border-color:rgba(229,9,20,.25);}
+.ep-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:rgba(255,255,255,.2);min-width:28px;text-align:center;}
+.episode-item.active .ep-num{color:var(--red);}
+.ep-info{flex:1;}
+.ep-title{font-size:13px;font-weight:500;}
+.ep-air{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* CAST */
+.cast-list{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.cast-chip{background:var(--surface2);border:1px solid rgba(255,255,255,.06);padding:5px 11px;border-radius:20px;font-size:12px;color:var(--muted);}
+
+/* SIDEBAR */
+.related-list{display:flex;flex-direction:column;gap:10px;}
+.related-item{display:flex;gap:12px;cursor:pointer;border-radius:6px;padding:8px;transition:background .2s;}
+.related-item:hover{background:var(--surface2);}
+.related-img{width:100px;height:60px;border-radius:4px;object-fit:cover;flex-shrink:0;background:var(--surface2);}
+.related-info{flex:1;min-width:0;}
+.related-title{font-size:13px;font-weight:500;line-height:1.3;margin-bottom:4px;}
+.related-meta{font-size:11px;color:var(--muted);}
+.related-rating{color:#f5c518;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:#222;border:1px solid rgba(255,255,255,.1);
+  color:#fff;font-size:13px;padding:10px 20px;border-radius:24px;
+  z-index:3000;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="back-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </a>
+  <div class="logo">Cinema Nest</div>
+  <div class="watch-title" id="watch-title">Loading...</div>
+</div>
+
+<!-- PLAYER -->
+<div class="player-wrap" id="player-wrap">
+  <div class="player-overlay" id="player-overlay">
+    <div id="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loading-text">Loading stream...</div>
+    </div>
+    <div class="error-state" id="error-state">
+      <div class="error-icon">⚠️</div>
+      <div class="error-msg" id="error-msg">This source failed to load. Try another source below.</div>
+      <button class="retry-btn" onclick="nextSource()">Try Next Source →</button>
+    </div>
+  </div>
+  <iframe id="player" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
+</div>
+
+<!-- SOURCE BAR -->
+<div class="source-bar">
+  <span class="source-label">Servers:</span>
+  <div id="source-btns"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div>
+    <div class="movie-title" id="movie-title">—</div>
+    <div class="movie-meta" id="movie-meta"></div>
+    <p class="movie-overview" id="movie-overview"></p>
+    <div class="action-row">
+      <button class="btn-secondary" onclick="toggleMyList()" id="mylist-btn">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        My List
+      </button>
+      <button class="btn-secondary" onclick="shareTitle()">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
+    </div>
+
+    <div class="seasons-section" id="seasons-section" style="display:none">
+      <div class="section-heading">Episodes</div>
+      <div class="season-tabs" id="season-tabs"></div>
+      <div class="episodes-grid" id="episodes-grid"></div>
+    </div>
+
+    <div class="section-heading" style="margin-bottom:12px" id="cast-heading" style="display:none">Cast</div>
+    <div class="cast-list" id="cast-list"></div>
+  </div>
+
+  <div>
+    <div class="section-heading" style="margin-bottom:14px">More Like This</div>
+    <div class="related-list" id="related-list"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_KEY = "1d3ae144acfb6bfcb25f70361cedcf29";
+const API = "https://api.themoviedb.org/3";
+const IMG_W = "https://image.tmdb.org/t/p/w500";
+
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id');
+const type = params.get('type');
+
+let myList = JSON.parse(localStorage.getItem('cinemanest-mylist') || '[]');
+let currentSeason = 1;
+let currentEpisode = 1;
+let currentSource = 0;
+let movieData = null;
+let loadTimer = null;
+
+/* 
+  Sources ordered by reliability (2026):
+  1. vidlink.pro  — active, TMDB-native, good uptime
+  2. multiembed.mov — reliable, TMDB param supported
+  3. vidsrc.cc — frequently working alternative
+  4. 2embed.cc — long-standing embed service
+  5. vidsrc.me — fallback
+*/
+const SOURCES = [
+  {
+    label: 'Server 1',
+    movie: id => `https://vidlink.pro/movie/${id}?autoplay=true&primaryColor=e50914`,
+    tv:    (id,s,e) => `https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=true&primaryColor=e50914`,
+  },
+  {
+    label: 'Server 2',
+    movie: id => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+    tv:    (id,s,e) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
+  },
+  {
+    label: 'Server 3',
+    movie: id => `https://vidsrc.cc/v2/embed/movie/${id}`,
+    tv:    (id,s,e) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    label: 'Server 4',
+    movie: id => `https://www.2embed.cc/embed/${id}`,
+    tv:    (id,s,e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
+  },
+  {
+    label: 'Server 5',
+    movie: id => `https://vidsrc.me/embed/movie?tmdb=${id}`,
+    tv:    (id,s,e) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+  },
+];
+
+function buildSrc() {
+  const s = SOURCES[currentSource];
+  return type === 'tv' ? s.tv(id, currentSeason, currentEpisode) : s.movie(id);
+}
+
+function setOverlay(state) {
+  const overlay = document.getElementById('player-overlay');
+  const loading = document.getElementById('loading-state');
+  const error   = document.getElementById('error-state');
+  if (state === 'loading') {
+    overlay.classList.remove('hidden');
+    loading.style.display = 'flex';
+    loading.style.flexDirection = 'column';
+    loading.style.alignItems = 'center';
+    loading.style.gap = '16px';
+    error.classList.remove('show');
+  } else if (state === 'error') {
+    overlay.classList.remove('hidden');
+    loading.style.display = 'none';
+    error.classList.add('show');
+  } else {
+    overlay.classList.add('hidden');
+    error.classList.remove('show');
+  }
+}
+
+function loadPlayer() {
+  clearTimeout(loadTimer);
+  setOverlay('loading');
+  document.getElementById('loading-text').innerText = `Connecting to ${SOURCES[currentSource].label}...`;
+
+  const iframe = document.getElementById('player');
+  iframe.src = '';
+
+  // Give iframe time to clear then load
+  setTimeout(() => {
+    iframe.src = buildSrc();
+
+    // If still loading after 12s, show error
+    loadTimer = setTimeout(() => {
+      setOverlay('error');
+      document.getElementById('error-msg').innerText =
+        `${SOURCES[currentSource].label} didn't respond. Try another server.`;
+    }, 12000);
+
+    iframe.onload = () => {
+      clearTimeout(loadTimer);
+      // Small delay so player UI can render before hiding overlay
+      setTimeout(() => setOverlay('hidden'), 1200);
+    };
+  }, 100);
+}
+
+function nextSource() {
+  currentSource = (currentSource + 1) % SOURCES.length;
+  buildSourceBtns();
+  loadPlayer();
+}
+
+function buildSourceBtns() {
+  const wrap = document.getElementById('source-btns');
+  wrap.innerHTML = '';
+  SOURCES.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'src-btn' + (i === currentSource ? ' active' : '');
+    btn.innerText = s.label;
+    btn.onclick = () => {
+      currentSource = i;
+      buildSourceBtns();
+      loadPlayer();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+/* DETAILS */
+async function loadDetails() {
+  const res = await fetch(`${API}/${type}/${id}?api_key=${API_KEY}&append_to_response=credits,similar`);
+  movieData = await res.json();
+
+  const title = movieData.title || movieData.name || '';
+  document.title = `${title} — Cinema Nest`;
+  document.getElementById('watch-title').innerText = title;
+  document.getElementById('movie-title').innerText = title;
+  document.getElementById('movie-overview').innerText = movieData.overview || '';
+
+  const year = (movieData.release_date || movieData.first_air_date || '').slice(0,4);
+  const rating = movieData.vote_average ? movieData.vote_average.toFixed(1) : '';
+  const runtime = movieData.runtime
+    ? `${Math.floor(movieData.runtime/60)}h ${movieData.runtime%60}m`
+    : (movieData.number_of_seasons ? `${movieData.number_of_seasons} season${movieData.number_of_seasons>1?'s':''}` : '');
+  const genres = (movieData.genres||[]).slice(0,3).map(g=>g.name).join(' · ');
+
+  document.getElementById('movie-meta').innerHTML = `
+    <span class="badge badge-red">${type==='tv'?'TV Show':'Movie'}</span>
+    ${year?`<span>${year}</span>`:''}
+    ${runtime?`<span>${runtime}</span>`:''}
+    ${rating?`<span class="badge badge-gold">★ ${rating}</span>`:''}
+    ${genres?`<span>${genres}</span>`:''}
+  `;
+
+  const cast = (movieData.credits?.cast||[]).slice(0,10);
+  document.getElementById('cast-list').innerHTML = cast.length
+    ? cast.map(c=>`<span class="cast-chip">${c.name}</span>`).join('')
+    : '';
+
+  updateMyListBtn();
+
+  if (type === 'tv') {
+    document.getElementById('seasons-section').style.display = 'block';
+    buildSeasonTabs(movieData.number_of_seasons || 1);
+    loadEpisodes(1);
+  }
+
+  const related = (movieData.similar?.results||[]).filter(x=>x.backdrop_path).slice(0,8);
+  const relEl = document.getElementById('related-list');
+  relEl.innerHTML = '';
+  related.forEach(item => {
+    const y = (item.release_date||item.first_air_date||'').slice(0,4);
+    const r = item.vote_average ? '★ '+item.vote_average.toFixed(1) : '';
+    const div = document.createElement('div');
+    div.className = 'related-item';
+    div.innerHTML = `
+      <img class="related-img" src="${IMG_W+item.backdrop_path}" alt="" loading="lazy">
+      <div class="related-info">
+        <div class="related-title">${item.title||item.name}</div>
+        <div class="related-meta">${y?`<span>${y}</span> `:''}${r?`<span class="related-rating">${r}</span>`:''}</div>
+      </div>`;
+    div.onclick = () => window.location.href = `watch.html?id=${item.id}&type=${type}`;
+    relEl.appendChild(div);
+  });
+}
+
+function buildSeasonTabs(count) {
+  const c = document.getElementById('season-tabs');
+  c.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'season-tab' + (i===1?' active':'');
+    btn.innerText = `Season ${i}`;
+    btn.onclick = () => {
+      currentSeason = i;
+      currentEpisode = 1;
+      document.querySelectorAll('.season-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadEpisodes(i);
+    };
+    c.appendChild(btn);
+  }
+}
+
+async function loadEpisodes(season) {
+  const grid = document.getElementById('episodes-grid');
+  grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">Loading episodes...</div>';
+  try {
+    const res = await fetch(`${API}/tv/${id}/season/${season}?api_key=${API_KEY}`);
+    const data = await res.json();
+    grid.innerHTML = '';
+    (data.episodes||[]).forEach(ep => {
+      const div = document.createElement('div');
+      div.className = 'episode-item' + (ep.episode_number===currentEpisode?' active':'');
+      div.innerHTML = `
+        <div class="ep-num">${ep.episode_number}</div>
+        <div class="ep-info">
+          <div class="ep-title">${ep.name||`Episode ${ep.episode_number}`}</div>
+          <div class="ep-air">${ep.air_date||''}</div>
+        </div>`;
+      div.onclick = () => {
+        currentEpisode = ep.episode_number;
+        document.querySelectorAll('.episode-item').forEach(e=>e.classList.remove('active'));
+        div.classList.add('active');
+        loadPlayer();
+        window.scrollTo({top:0,behavior:'smooth'});
+      };
+      grid.appendChild(div);
+    });
+  } catch(e) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">Could not load episodes.</div>';
+  }
+}
+
+function updateMyListBtn() {
+  const inList = myList.some(x => x.id == id);
+  const btn = document.getElementById('mylist-btn');
+  if (!btn) return;
+  btn.innerHTML = inList
+    ? `<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="20 6 9 17 4 12"/></svg> In My List`
+    : `<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> My List`;
+}
+
+function toggleMyList() {
+  if (!movieData) return;
+  const idx = myList.findIndex(x => x.id == id);
+  if (idx > -1) { myList.splice(idx, 1); showToast('Removed from My List'); }
+  else { myList.push({id:parseInt(id),type,title:movieData.title||movieData.name,backdrop:movieData.backdrop_path,poster:movieData.poster_path}); showToast('Added to My List'); }
+  localStorage.setItem('cinemanest-mylist', JSON.stringify(myList));
+  updateMyListBtn();
+}
+
+function shareTitle() {
+  const url = window.location.href;
+  if (navigator.share) navigator.share({title:document.title,url});
+  else navigator.clipboard.writeText(url).then(()=>showToast('Link copied!'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* INIT */
+buildSourceBtns();
+loadPlayer();
+loadDetails();
+</script>
+</body>
+</html>
