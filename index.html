@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KENFLIX</title>
+
+<link rel="preconnect" href="https://image.tmdb.org">
 
 <style>
 
@@ -16,81 +17,137 @@ font-family:Arial,sans-serif;
 }
 
 body{
-background:#111;
-color:#fff;
+background:#141414;
+color:white;
 overflow-x:hidden;
 }
 
-/* HEADER */
+/* NAVBAR */
 
-header{
+.nav{
 position:fixed;
 top:0;
 width:100%;
+padding:18px 50px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:15px 30px;
-background:rgba(0,0,0,0.85);
 z-index:1000;
+background:linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+transition:0.3s;
 }
 
 .logo{
-font-size:32px;
+font-size:34px;
 font-weight:bold;
 color:#e50914;
+letter-spacing:1px;
 }
 
 .search{
-padding:10px;
-width:250px;
-border:none;
+background:rgba(0,0,0,0.6);
+border:1px solid rgba(255,255,255,0.2);
+padding:12px 15px;
+border-radius:30px;
+color:white;
 outline:none;
+width:260px;
+backdrop-filter:blur(10px);
+}
+
+/* HERO */
+
+.hero{
+height:95vh;
+background-size:cover;
+background-position:center;
+position:relative;
+display:flex;
+align-items:flex-end;
+padding:60px;
+}
+
+.hero::after{
+content:'';
+position:absolute;
+left:0;
+bottom:0;
+width:100%;
+height:40%;
+background:linear-gradient(to top,#141414,transparent);
+}
+
+.hero-content{
+position:relative;
+z-index:2;
+max-width:600px;
+}
+
+.hero-title{
+font-size:70px;
+margin-bottom:20px;
+font-weight:bold;
+}
+
+.hero-desc{
+line-height:1.6;
+color:#ddd;
+margin-bottom:20px;
+}
+
+.hero-buttons{
+display:flex;
+gap:15px;
+}
+
+.btn{
+padding:14px 28px;
+border:none;
 border-radius:5px;
-background:#222;
+font-size:16px;
+cursor:pointer;
+font-weight:bold;
+transition:0.3s;
+}
+
+.play-btn{
+background:white;
+color:black;
+}
+
+.play-btn:hover{
+background:#ddd;
+}
+
+.info-btn{
+background:rgba(109,109,110,0.7);
 color:white;
 }
 
-/* BANNER */
-
-.banner{
-height:75vh;
-background-size:cover;
-background-position:center;
-display:flex;
-align-items:flex-end;
-padding:40px;
-}
-
-.banner-content{
-max-width:550px;
-}
-
-.banner h1{
-font-size:60px;
-margin-bottom:10px;
-}
-
-.banner p{
-line-height:1.5;
-color:#ddd;
+.info-btn:hover{
+background:rgba(109,109,110,0.4);
 }
 
 /* ROWS */
 
 .row{
-margin-top:20px;
-padding-left:20px;
+margin-top:-80px;
+padding-left:40px;
+position:relative;
+z-index:3;
+margin-bottom:40px;
 }
 
 .row h2{
-margin-bottom:10px;
+margin-bottom:15px;
+font-size:24px;
 }
 
 .row-posters{
 display:flex;
 overflow-x:auto;
-padding:10px 0;
+overflow-y:hidden;
+padding:20px 0;
 scroll-behavior:smooth;
 }
 
@@ -99,15 +156,18 @@ display:none;
 }
 
 .poster{
-width:180px;
+width:220px;
+max-height:125px;
+object-fit:cover;
 margin-right:10px;
-border-radius:8px;
+border-radius:6px;
 cursor:pointer;
-transition:0.3s;
+transition:transform 0.35s;
 }
 
 .poster:hover{
-transform:scale(1.12);
+transform:scale(1.15);
+z-index:20;
 }
 
 /* MODAL */
@@ -118,43 +178,51 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.95);
 display:none;
 justify-content:center;
 align-items:center;
+background:rgba(0,0,0,0.95);
 z-index:5000;
+animation:fade 0.3s ease;
+}
+
+@keyframes fade{
+from{opacity:0;}
+to{opacity:1;}
 }
 
 .modal-content{
 width:90%;
-max-width:1000px;
+max-width:1100px;
 position:relative;
-}
-
-.close{
-position:absolute;
-top:-45px;
-right:0;
-font-size:40px;
-cursor:pointer;
 }
 
 iframe{
 width:100%;
-height:550px;
+height:620px;
 border:none;
 border-radius:10px;
 background:black;
 }
 
-.episode-controls{
-margin-top:15px;
+.close{
+position:absolute;
+top:-50px;
+right:0;
+font-size:45px;
+cursor:pointer;
+}
+
+/* EPISODES */
+
+.episodes{
 display:flex;
 gap:10px;
 flex-wrap:wrap;
+margin-top:15px;
 }
 
-.episode-controls button{
+.episodes button{
 padding:10px 15px;
 border:none;
 background:#e50914;
@@ -167,25 +235,43 @@ cursor:pointer;
 
 @media(max-width:768px){
 
-.banner{
-height:60vh;
-padding:20px;
+.nav{
+padding:15px 20px;
 }
 
-.banner h1{
-font-size:35px;
+.logo{
+font-size:24px;
+}
+
+.search{
+width:140px;
+padding:10px;
+}
+
+.hero{
+height:75vh;
+padding:25px;
+}
+
+.hero-title{
+font-size:40px;
+}
+
+.hero-desc{
+font-size:14px;
 }
 
 .poster{
-width:130px;
+width:150px;
+max-height:90px;
 }
 
 iframe{
 height:250px;
 }
 
-.search{
-width:150px;
+.row{
+padding-left:20px;
 }
 
 }
@@ -195,7 +281,9 @@ width:150px;
 
 <body>
 
-<header>
+<!-- NAV -->
+
+<div class="nav">
 
 <div class="logo">KENFLIX</div>
 
@@ -203,40 +291,64 @@ width:150px;
 type="text"
 class="search"
 id="search"
-placeholder="Search..."
+placeholder="Search movies..."
 >
 
-</header>
+</div>
 
-<div class="banner" id="banner">
+<!-- HERO -->
 
-<div class="banner-content">
+<div class="hero" id="hero">
 
-<h1 id="banner-title">Loading...</h1>
+<div class="hero-content">
 
-<p id="banner-desc"></p>
+<h1 class="hero-title" id="hero-title">Loading...</h1>
+
+<p class="hero-desc" id="hero-desc"></p>
+
+<div class="hero-buttons">
+
+<button class="btn play-btn" id="hero-play">
+▶ Play
+</button>
+
+<button class="btn info-btn">
+More Info
+</button>
 
 </div>
+
+</div>
+
+</div>
+
+<!-- ROWS -->
+
+<div class="row">
+
+<h2>Trending Now</h2>
+
+<div class="row-posters" id="trending"></div>
 
 </div>
 
 <div class="row">
 
-<h2>Trending Movies</h2>
-
-<div class="row-posters" id="movies"></div>
-
-</div>
-
-<div class="row">
-
-<h2>Popular TV Shows</h2>
+<h2>TV Shows</h2>
 
 <div class="row-posters" id="tvshows"></div>
 
 </div>
 
-<!-- PLAYER MODAL -->
+<div class="row">
+
+<h2>Top Rated</h2>
+
+<div class="row-posters" id="toprated"></div>
+
+</div>
+
+<!-- MODAL -->
 
 <div class="modal" id="modal">
 
@@ -250,10 +362,7 @@ allowfullscreen
 allow="autoplay"
 ></iframe>
 
-<div
-class="episode-controls"
-id="episodes"
-></div>
+<div class="episodes" id="episodes"></div>
 
 </div>
 
@@ -261,7 +370,7 @@ id="episodes"
 
 <script>
 
-const TMDB_KEY =
+const API_KEY =
 "1d3ae144acfb6bfcb25f70361cedcf29";
 
 const IMG =
@@ -270,9 +379,11 @@ const IMG =
 const API =
 "https://api.themoviedb.org/3";
 
-/* LOAD MOVIES */
+let heroMovie;
 
-async function loadContent(url, container, type){
+/* FETCH ROWS */
+
+async function fetchRow(url, container, type){
 
 const res = await fetch(url);
 
@@ -280,17 +391,17 @@ const data = await res.json();
 
 container.innerHTML = "";
 
-data.results.forEach(item => {
+data.results.forEach(movie=>{
 
-if(!item.poster_path) return;
+if(!movie.backdrop_path) return;
 
 const img = document.createElement("img");
 
-img.src = IMG + item.poster_path;
+img.src = IMG + movie.backdrop_path;
 
 img.classList.add("poster");
 
-img.onclick = () => openPlayer(item, type);
+img.onclick = ()=>openPlayer(movie.id,type);
 
 container.appendChild(img);
 
@@ -298,56 +409,72 @@ container.appendChild(img);
 
 }
 
-/* OPEN PLAYER */
+/* HERO */
 
-function openPlayer(item, type){
+async function loadHero(){
 
-const modal =
-document.getElementById("modal");
+const res = await fetch(
+`${API}/trending/movie/week?api_key=${API_KEY}`
+);
 
-const player =
-document.getElementById("player");
+const data = await res.json();
 
-const episodes =
-document.getElementById("episodes");
+heroMovie =
+data.results[
+Math.floor(Math.random()*data.results.length)
+];
 
-modal.style.display = "flex";
+document.getElementById("hero")
+.style.backgroundImage =
+`linear-gradient(to top,#141414,transparent),
+url(${IMG + heroMovie.backdrop_path})`;
 
-episodes.innerHTML = "";
+document.getElementById("hero-title")
+.innerText = heroMovie.title;
 
-if(type === "movie"){
-
-/* CODESPECTERS EMBED */
-
-player.src =
-`https://movie.codespecters.com/embed/movie/${item.id}`;
+document.getElementById("hero-desc")
+.innerText = heroMovie.overview;
 
 }
 
-/* TV */
+/* PLAYER */
 
-else{
+function openPlayer(id,type){
 
-player.src =
-`https://movie.codespecters.com/embed/tv/${item.id}/1/1`;
+document.getElementById("modal")
+.style.display = "flex";
 
-for(let ep = 1; ep <= 12; ep++){
+document.getElementById("episodes")
+.innerHTML = "";
+
+if(type === "tv"){
+
+document.getElementById("player").src =
+`https://movie.codespecters.com/embed/tv/${id}/1/1`;
+
+for(let i=1;i<=12;i++){
 
 const btn =
 document.createElement("button");
 
-btn.innerText = "Episode " + ep;
+btn.innerText = "Episode " + i;
 
-btn.onclick = () => {
+btn.onclick = ()=>{
 
-player.src =
-`https://movie.codespecters.com/embed/tv/${item.id}/1/${ep}`;
+document.getElementById("player").src =
+`https://movie.codespecters.com/embed/tv/${id}/1/${i}`;
 
 };
 
-episodes.appendChild(btn);
+document.getElementById("episodes")
+.appendChild(btn);
 
 }
+
+}else{
+
+document.getElementById("player").src =
+`https://movie.codespecters.com/embed/movie/${id}`;
 
 }
 
@@ -356,100 +483,86 @@ episodes.appendChild(btn);
 /* CLOSE */
 
 document.getElementById("close")
-.onclick = () => {
+.onclick = ()=>{
 
 document.getElementById("modal")
 .style.display = "none";
 
-document.getElementById("player")
-.src = "";
+document.getElementById("player").src = "";
+
+};
+
+/* HERO PLAY */
+
+document.getElementById("hero-play")
+.onclick = ()=>{
+
+openPlayer(heroMovie.id,"movie");
 
 };
 
 /* SEARCH */
 
 document.getElementById("search")
-.addEventListener("keyup", async(e)=>{
+.addEventListener("keyup",async(e)=>{
 
-const query = e.target.value;
+const q = e.target.value;
 
-if(query.length < 2) return;
+if(q.length < 2) return;
 
 const res = await fetch(
-`${API}/search/multi?api_key=${TMDB_KEY}&query=${query}`
+`${API}/search/multi?api_key=${API_KEY}&query=${q}`
 );
 
 const data = await res.json();
 
-const movies =
-document.getElementById("movies");
+document.getElementById("trending")
+.innerHTML = "";
 
-movies.innerHTML = "";
+data.results.forEach(movie=>{
 
-data.results.forEach(item => {
+if(!movie.backdrop_path) return;
 
-if(!item.poster_path) return;
+const img = document.createElement("img");
 
-const img =
-document.createElement("img");
-
-img.src = IMG + item.poster_path;
+img.src = IMG + movie.backdrop_path;
 
 img.classList.add("poster");
 
 img.onclick = ()=>openPlayer(
-item,
-item.media_type === "tv"
+movie.id,
+movie.media_type === "tv"
 ? "tv"
 : "movie"
 );
 
-movies.appendChild(img);
+document.getElementById("trending")
+.appendChild(img);
 
 });
 
 });
-
-/* BANNER */
-
-async function banner(){
-
-const res = await fetch(
-`${API}/trending/movie/week?api_key=${TMDB_KEY}`
-);
-
-const data = await res.json();
-
-const movie =
-data.results[Math.floor(Math.random()*data.results.length)];
-
-document.getElementById("banner")
-.style.backgroundImage =
-`linear-gradient(to top,#111,transparent),
-url(${IMG + movie.backdrop_path})`;
-
-document.getElementById("banner-title")
-.innerText = movie.title;
-
-document.getElementById("banner-desc")
-.innerText = movie.overview;
-
-}
 
 /* LOAD */
 
-banner();
+loadHero();
 
-loadContent(
-`${API}/trending/movie/week?api_key=${TMDB_KEY}`,
-document.getElementById("movies"),
+fetchRow(
+`${API}/trending/movie/week?api_key=${API_KEY}`,
+document.getElementById("trending"),
 "movie"
 );
 
-loadContent(
-`${API}/tv/popular?api_key=${TMDB_KEY}`,
+fetchRow(
+`${API}/tv/popular?api_key=${API_KEY}`,
 document.getElementById("tvshows"),
 "tv"
+);
+
+fetchRow(
+`${API}/movie/top_rated?api_key=${API_KEY}`,
+document.getElementById("toprated"),
+"movie"
 );
 
 </script>
