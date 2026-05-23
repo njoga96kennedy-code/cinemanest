@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cinema Nest</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#e50914;
+  --red-dark:#b0060f;
+  --bg:#0a0a0a;
+  --surface:#141414;
+  --surface2:#1e1e1e;
+  --text:#fff;
+  --muted:#aaa;
+  --radius:6px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+
+/* ─── NAV ─── */
+.nav{
+  position:fixed;top:0;width:100%;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 48px;
+  transition:background .4s,backdrop-filter .4s;
+}
+.nav.scrolled{background:rgba(10,10,10,.95);backdrop-filter:blur(12px);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--red);letter-spacing:2px;cursor:pointer;}
+.nav-right{display:flex;align-items:center;gap:20px;}
+
+.search-wrap{position:relative;display:flex;align-items:center;}
+.search-wrap svg{position:absolute;left:12px;width:16px;height:16px;stroke:var(--muted);pointer-events:none;}
+#search{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  padding:9px 14px 9px 36px;border-radius:24px;color:var(--text);
+  width:200px;font-size:14px;font-family:inherit;
+  transition:width .3s,background .2s,border-color .2s;outline:none;
+}
+#search:focus{width:280px;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.25);}
+#search::placeholder{color:var(--muted);}
+
+.my-list-btn{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  color:var(--text);padding:8px 16px;border-radius:24px;cursor:pointer;
+  font-size:13px;font-family:inherit;display:flex;align-items:center;gap:6px;
+  transition:background .2s;
+}
+.my-list-btn:hover{background:rgba(255,255,255,.15);}
+
+.subscribe-btn{
+  background:var(--red);border:none;
+  color:#fff;padding:8px 18px;border-radius:24px;cursor:pointer;
+  font-size:13px;font-family:inherit;font-weight:600;letter-spacing:.3px;
+  transition:background .2s,transform .15s;
+}
+.subscribe-btn:hover{background:var(--red-dark);transform:scale(1.04);}
+
+.btn-trial{
+  background:rgba(229,9,20,.15);color:var(--red);
+  border:1.5px solid rgba(229,9,20,.5);padding:12px 24px;border-radius:4px;
+  font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+  transition:background .2s,border-color .2s;
+}
+.btn-trial:hover{background:rgba(229,9,20,.25);border-color:var(--red);}
+
+/* ─── SEARCH RESULTS OVERLAY ─── */
+#search-results{
+  position:fixed;top:60px;left:0;right:0;bottom:0;
+  background:rgba(10,10,10,.97);z-index:999;
+  display:none;overflow-y:auto;padding:40px 48px;
+}
+#search-results.active{display:block;}
+#search-results h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:24px;color:var(--muted);}
+.search-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;}
+
+/* ─── HERO ─── */
+.hero{
+  height:100vh;min-height:560px;
+  display:flex;align-items:flex-end;
+  padding:0 48px 80px;
+  background-size:cover;background-position:center top;
+  position:relative;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(10,10,10,.9) 35%,transparent 70%),
+             linear-gradient(to top,rgba(10,10,10,.95) 0%,rgba(10,10,10,.3) 40%,transparent 65%);
+}
+.hero-content{position:relative;max-width:560px;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--red);color:#fff;font-size:11px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:4px 10px;border-radius:4px;margin-bottom:16px;
+}
+.hero h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,7vw,88px);
+  line-height:.95;letter-spacing:1px;
+  margin-bottom:16px;
+}
+.hero p{
+  font-size:15px;line-height:1.6;color:#ccc;
+  margin-bottom:28px;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:24px;font-size:13px;color:var(--muted);}
+.hero-meta .rating{color:#f5c518;font-weight:600;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-play{
+  background:var(--text);color:#000;
+  border:none;padding:12px 28px;border-radius:4px;
+  font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+  transition:background .2s,transform .1s;
+}
+.btn-play:hover{background:#ddd;transform:scale(1.02);}
+.btn-info{
+  background:rgba(255,255,255,.15);color:#fff;
+  border:none;padding:12px 24px;border-radius:4px;
+  font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+  backdrop-filter:blur(4px);
+  transition:background .2s;
+}
+.btn-info:hover{background:rgba(255,255,255,.25);}
+
+/* ─── GENRE NAV ─── */
+.genre-nav{
+  display:flex;gap:8px;padding:16px 48px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.genre-nav::-webkit-scrollbar{display:none;}
+.genre-pill{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  color:var(--muted);padding:7px 16px;border-radius:20px;
+  font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.genre-pill:hover,.genre-pill.active{
+  background:var(--red);color:#fff;border-color:var(--red);
+}
+
+/* ─── ROWS ─── */
+.rows-wrap{padding:0 0 60px;}
+.row{margin-bottom:8px;padding:0;}
+.row-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 48px 10px;
+}
+.row-header h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:1px;
+}
+.see-all{
+  font-size:12px;color:var(--red);cursor:pointer;
+  text-transform:uppercase;letter-spacing:1px;
+  background:none;border:none;font-family:inherit;
+}
+
+.row-container{position:relative;}
+.row-posters{
+  display:flex;gap:10px;
+  overflow-x:auto;scroll-behavior:smooth;
+  padding:8px 48px 20px;
+  scrollbar-width:none;
+}
+.row-posters::-webkit-scrollbar{display:none;}
+
+/* ─── ARROWS ─── */
+.arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:44px;height:80px;
+  background:rgba(10,10,10,.85);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:10;
+  transition:background .2s;border:none;color:#fff;
+}
+.arrow:hover{background:rgba(10,10,10,.98);}
+.arrow.left{left:0;border-radius:0 4px 4px 0;}
+.arrow.right{right:0;border-radius:4px 0 0 4px;}
+.arrow svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.5;}
+
+/* ─── CARDS ─── */
+.poster-landscape{
+  width:260px;height:148px;
+  border-radius:var(--radius);overflow:hidden;
+  cursor:pointer;flex-shrink:0;position:relative;
+  transition:transform .25s,box-shadow .25s;
+}
+.poster-portrait{
+  width:148px;height:222px;
+  border-radius:var(--radius);overflow:hidden;
+  cursor:pointer;flex-shrink:0;position:relative;
+  transition:transform .25s,box-shadow .25s;
+}
+.poster-landscape:hover,.poster-portrait:hover{
+  transform:scale(1.06);
+  box-shadow:0 12px 40px rgba(0,0,0,.7);
+  z-index:5;
+}
+.poster-landscape img,.poster-portrait img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+.card-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 50%);
+  opacity:0;transition:opacity .25s;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:10px;
+}
+.poster-landscape:hover .card-overlay,
+.poster-portrait:hover .card-overlay{opacity:1;}
+.card-title{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:4px;}
+.card-year{font-size:11px;color:var(--muted);}
+
+.card-mylist{
+  position:absolute;top:8px;right:8px;
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(0,0,0,.7);border:1.5px solid rgba(255,255,255,.4);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .2s,background .2s;cursor:pointer;
+}
+.poster-landscape:hover .card-mylist,
+.poster-portrait:hover .card-mylist{opacity:1;}
+.card-mylist:hover{background:var(--red);border-color:var(--red);}
+.card-mylist svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;}
+
+/* ─── SKELETON ─── */
+.skeleton{
+  background:linear-gradient(90deg,var(--surface2) 25%,#2a2a2a 50%,var(--surface2) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.4s infinite;
+  border-radius:var(--radius);flex-shrink:0;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ─── MODAL ─── */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:2000;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+  padding:16px;
+}
+.modal-backdrop.open{opacity:1;pointer-events:all;}
+.modal{
+  background:#181818;border-radius:12px;
+  width:100%;max-width:800px;max-height:90vh;
+  overflow-y:auto;position:relative;
+  transform:scale(.95);transition:transform .3s;
+  scrollbar-width:none;
+}
+.modal-backdrop.open .modal{transform:scale(1);}
+.modal::-webkit-scrollbar{display:none;}
+.modal-backdrop-img{
+  width:100%;aspect-ratio:16/9;object-fit:cover;
+  border-radius:12px 12px 0 0;display:block;
+  background:var(--surface2);
+}
+.modal-img-overlay{
+  position:relative;margin-top:-80px;padding:0 32px 32px;
+}
+.modal-title{
+  font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:1px;
+  margin-bottom:8px;
+}
+.modal-meta{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted);margin-bottom:16px;flex-wrap:wrap;}
+.modal-meta .rating{color:#f5c518;font-weight:600;color:var(--text);}
+.modal-overview{font-size:14px;line-height:1.7;color:#ccc;margin-bottom:24px;}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.modal-close{
+  position:sticky;top:16px;float:right;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(0,0,0,.8);border:1.5px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;margin:-48px -16px 16px auto;z-index:10;
+}
+.modal-close svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;}
+
+/* ─── MY LIST PANEL ─── */
+.mylist-panel{
+  position:fixed;top:0;right:-420px;height:100%;
+  width:400px;background:#181818;z-index:2001;
+  transition:right .35s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;padding:24px;box-shadow:-8px 0 40px rgba(0,0,0,.6);
+}
+.mylist-panel.open{right:0;}
+.mylist-panel h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:20px;}
+.mylist-close{
+  float:right;background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:22px;margin-top:-4px;
+}
+.mylist-empty{color:var(--muted);font-size:14px;margin-top:32px;text-align:center;}
+.mylist-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;
+}
+.mylist-item img{width:64px;height:40px;border-radius:4px;object-fit:cover;background:var(--surface2);}
+.mylist-item-info{flex:1;}
+.mylist-item-title{font-size:13px;font-weight:500;}
+.mylist-item-type{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.mylist-item-rm{
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;
+  transition:color .2s;
+}
+.mylist-item-rm:hover{color:var(--red);}
+
+/* ─── TOAST ─── */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#222;border:1px solid rgba(255,255,255,.1);
+  color:#fff;font-size:13px;padding:10px 20px;border-radius:24px;
+  z-index:3000;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;
+  white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .nav{padding:12px 20px;}
+  #search{width:140px;}
+  #search:focus{width:180px;}
+  .hero{padding:0 20px 60px;}
+  .hero h1{font-size:40px;}
+  .hero p{-webkit-line-clamp:2;}
+  .genre-nav{padding:12px 20px;}
+  .row-header{padding:20px 20px 8px;}
+  .row-posters{padding:8px 20px 16px;}
+  .poster-landscape{width:200px;height:114px;}
+  .poster-portrait{width:120px;height:180px;}
+  .arrow{display:none;}
+  .search-wrap svg{display:none;}
+  #search-results{padding:24px 20px;}
+  .mylist-panel{width:100%;right:-100%;}
+  .modal{border-radius:8px;}
+  .modal-img-overlay{padding:0 20px 24px;}
+  .modal-title{font-size:28px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="logo" onclick="scrollTo(0,0)">Cinema Nest</div>
+  <div class="nav-right">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="search" placeholder="Search movies & shows...">
+    </div>
+    <button class="subscribe-btn" id="nav-cta" onclick="window.location.href='signup.html'">Start Free Trial</button>
+    <div id="nav-trial-badge" style="display:none;align-items:center;gap:10px;">
+      <div id="trial-pill-nav" style="
+        display:flex;align-items:center;gap:7px;
+        background:rgba(229,9,20,.12);border:1px solid rgba(229,9,20,.3);
+        color:#e50914;font-size:11px;font-weight:700;letter-spacing:1.5px;
+        text-transform:uppercase;padding:6px 13px;border-radius:20px;white-space:nowrap;cursor:default;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#e50914;animation:blink 2s infinite;display:inline-block;flex-shrink:0;"></span>
+        <span id="trial-days-label">Trial · 7 days left</span>
+      </div>
+      <button id="nav-signout-btn" style="
+        background:none;border:1px solid rgba(255,255,255,.15);color:#aaa;
+        padding:6px 13px;border-radius:20px;font-family:inherit;font-size:12px;
+        cursor:pointer;transition:all .2s;" 
+        onmouseover="this.style.borderColor='rgba(255,255,255,.4)';this.style.color='#fff'"
+        onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='#aaa'">
+        Sign Out
+      </button>
+    </div>
+    <button class="my-list-btn" onclick="openMyList()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      My List
+    </button>
+  </div>
+</nav>
+
+<!-- TRIAL BANNER -->
+<div id="trial-banner" style="display:none;background:linear-gradient(90deg,rgba(229,9,20,.18),rgba(229,9,20,.08));border-bottom:1px solid rgba(229,9,20,.2);padding:10px 48px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#e50914" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    <span id="banner-text" style="font-size:13px;color:#fff;font-weight:500;"></span>
+  </div>
+  <a href="pricing.html" style="font-size:12px;color:#e50914;font-weight:700;text-decoration:none;white-space:nowrap;letter-spacing:.3px;">Upgrade Now →</a>
+</div>
+
+<!-- SEARCH RESULTS -->
+<div id="search-results">
+  <h2 id="search-heading">Search Results</h2>
+  <div class="search-grid" id="search-grid"></div>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Trending Now
+    </div>
+    <h1 id="hero-title">Loading...</h1>
+    <div class="hero-meta">
+      <span class="rating" id="hero-rating"></span>
+      <span id="hero-year"></span>
+      <span id="hero-genre"></span>
+    </div>
+    <p id="hero-desc"></p>
+    <div class="hero-actions">
+      <button class="btn-trial" onclick="window.location.href='signup.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="currentColor" stroke="none"/></svg>
+        Start Free Trial
+      </button>
+      <button class="btn-play" id="hero-play">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Play Now
+      </button>
+      <button class="btn-info" id="hero-info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        More Info
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- GENRE NAV -->
+<div class="genre-nav" id="genre-nav">
+  <button class="genre-pill active" onclick="filterGenre(0,this)">All</button>
+  <button class="genre-pill" onclick="filterGenre(28,this)">Action</button>
+  <button class="genre-pill" onclick="filterGenre(35,this)">Comedy</button>
+  <button class="genre-pill" onclick="filterGenre(27,this)">Horror</button>
+  <button class="genre-pill" onclick="filterGenre(10749,this)">Romance</button>
+  <button class="genre-pill" onclick="filterGenre(878,this)">Sci-Fi</button>
+  <button class="genre-pill" onclick="filterGenre(18,this)">Drama</button>
+  <button class="genre-pill" onclick="filterGenre(16,this)">Animation</button>
+  <button class="genre-pill" onclick="filterGenre(99,this)">Documentary</button>
+  <button class="genre-pill" onclick="filterGenre(53,this)">Thriller</button>
+</div>
+
+<!-- ROWS -->
+<div class="rows-wrap" id="rows-wrap">
+
+  <div class="row" id="row-trending">
+    <div class="row-header"><h2>🔥 Trending This Week</h2><button class="see-all" onclick="seeAll('','Trending','movie')">See All</button></div>
+    <div class="row-container">
+      <button class="arrow left" onclick="scrollRow('trending-list',-1)" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="arrow right" onclick="scrollRow('trending-list',1)" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="row-posters" id="trending-list"></div>
+    </div>
+  </div>
+
+  <div class="row" id="row-top">
+    <div class="row-header"><h2>⭐ Top Rated Movies</h2><button class="see-all" onclick="seeAll('','Top Rated','movie')">See All</button></div>
+    <div class="row-container">
+      <button class="arrow left" onclick="scrollRow('top-list',-1)" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="arrow right" onclick="scrollRow('top-list',1)" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="row-posters" id="top-list"></div>
+    </div>
+  </div>
+
+  <div class="row" id="row-action">
+    <div class="row-header"><h2>💥 Action & Adventure</h2><button class="see-all" onclick="seeAll('28','Action & Adventure','movie')">See All</button></div>
+    <div class="row-container">
+      <button class="arrow left" onclick="scrollRow('action-list',-1)" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="arrow right" onclick="scrollRow('action-list',1)" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="row-posters" id="action-list"></div>
+    </div>
+  </div>
+
+  <div class="row" id="row-tv">
+    <div class="row-header"><h2>📺 Popular TV Shows</h2><button class="see-all" onclick="seeAll('','Popular TV Shows','tv')">See All</button></div>
+    <div class="row-container">
+      <button class="arrow left" onclick="scrollRow('tv-list',-1)" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="arrow right" onclick="scrollRow('tv-list',1)" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="row-posters" id="tv-list"></div>
+    </div>
+  </div>
+
+  <div class="row" id="row-horror">
+    <div class="row-header"><h2>👻 Horror</h2><button class="see-all" onclick="seeAll('27','Horror','movie')">See All</button></div>
+    <div class="row-container">
+      <button class="arrow left" onclick="scrollRow('horror-list',-1)" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="arrow right" onclick="scrollRow('horror-list',1)" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="row-posters" id="horror-list"></div>
+    </div>
+  </div>
+
+  <div class="row" id="row-comedy">
+    <div class="row-header"><h2>😂 Comedy</h2><button class="see-all" onclick="seeAll('35','Comedy','movie')">See All</button></div>
+    <div class="row-container">
+      <button class="arrow left" onclick="scrollRow('comedy-list',-1)" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="arrow right" onclick="scrollRow('comedy-list',1)" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="row-posters" id="comedy-list"></div>
+    </div>
+  </div>
+
+  <div class="row" id="row-anime">
+    <div class="row-header"><h2>🎌 Anime</h2><button class="see-all" onclick="seeAll('16','Anime','tv')">See All</button></div>
+    <div class="row-container">
+      <button class="arrow left" onclick="scrollRow('anime-list',-1)" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="arrow right" onclick="scrollRow('anime-list',1)" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="row-posters" id="anime-list"></div>
+    </div>
+  </div>
+
+  <div class="row" id="row-african">
+    <div class="row-header"><h2>🌍 African Stories</h2><button class="see-all" onclick="seeAll('','African Stories','movie')">See All</button></div>
+    <div class="row-container">
+      <button class="arrow left" onclick="scrollRow('african-list',-1)" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="arrow right" onclick="scrollRow('african-list',1)" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <div class="row-posters" id="african-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-backdrop" id="modal" onclick="closeModalOnBg(event)">
+  <div class="modal" id="modal-box">
+    <button class="modal-close" onclick="closeModal()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <img class="modal-backdrop-img" id="modal-img" src="" alt="">
+    <div class="modal-img-overlay">
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-meta" id="modal-meta"></div>
+      <p class="modal-overview" id="modal-overview"></p>
+      <div class="modal-actions">
+        <button class="btn-play" id="modal-play">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Play
+        </button>
+        <button class="btn-info" id="modal-mylist-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add to My List
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MY LIST PANEL -->
+<div class="mylist-panel" id="mylist-panel">
+  <h2>My List <button class="mylist-close" onclick="closeMyList()">✕</button></h2>
+  <div id="mylist-content"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API_KEY = "1d3ae144acfb6bfcb25f70361cedcf29";
+const API = "https://api.themoviedb.org/3";
+const IMG = "https://image.tmdb.org/t/p/original";
+const IMG_W = "https://image.tmdb.org/t/p/w500";
+
+let heroMovie = null;
+let myList = JSON.parse(localStorage.getItem('cinemanest-mylist') || '[]');
+let searchTimeout = null;
+let currentModal = null;
+
+/* ── NAV SCROLL ── */
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+/* ── HERO ── */
+async function loadHero() {
+  const res = await fetch(`${API}/trending/movie/week?api_key=${API_KEY}`);
+  const data = await res.json();
+  heroMovie = data.results[Math.floor(Math.random() * Math.min(data.results.length, 8))];
+  const h = document.getElementById('hero');
+  h.style.backgroundImage = `url(${IMG + heroMovie.backdrop_path})`;
+  document.getElementById('hero-title').innerText = heroMovie.title;
+  document.getElementById('hero-desc').innerText = heroMovie.overview;
+  document.getElementById('hero-rating').innerText = '★ ' + heroMovie.vote_average.toFixed(1);
+  document.getElementById('hero-year').innerText = heroMovie.release_date?.slice(0,4) || '';
+  document.getElementById('hero-play').onclick = () => goWatch(heroMovie.id, 'movie');
+  document.getElementById('hero-info').onclick = () => openModal(heroMovie.id, 'movie');
+}
+
+/* ── SKELETONS ── */
+function addSkeletons(containerId, count, style) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'skeleton';
+    d.style.width = style === 'landscape' ? '260px' : '148px';
+    d.style.height = style === 'landscape' ? '148px' : '222px';
+    d.style.flexShrink = '0';
+    c.appendChild(d);
+  }
+}
+
+/* ── FETCH ROW ── */
+async function fetchRow(url, id, type, style) {
+  addSkeletons(id, 8, style);
+  const res = await fetch(url);
+  const data = await res.json();
+  buildCards(data.results, id, type, style);
+}
+
+function buildCards(items, containerId, type, style) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+  items.forEach(item => {
+    const imgPath = style === 'landscape' ? item.backdrop_path : item.poster_path;
+    if (!imgPath) return;
+    const div = document.createElement('div');
+    div.className = style === 'landscape' ? 'poster-landscape' : 'poster-portrait';
+    const title = item.title || item.name || '';
+    const year = (item.release_date || item.first_air_date || '').slice(0, 4);
+    div.innerHTML = `
+      <img src="${IMG_W + imgPath}" alt="${title}" loading="lazy">
+      <div class="card-overlay">
+        <div class="card-title">${title}</div>
+        <div class="card-year">${year}</div>
+      </div>
+      <button class="card-mylist" onclick="toggleMyList(event,${JSON.stringify(item)},${JSON.stringify(type)},${JSON.stringify(style)})" aria-label="Add to my list">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    `;
+    div.addEventListener('click', () => openModal(item.id, type));
+    c.appendChild(div);
+  });
+}
+
+/* ── SCROLL ── */
+window.scrollRow = (id, dir) => {
+  document.getElementById(id)?.scrollBy({ left: dir * 460, behavior: 'smooth' });
+};
+
+/* ── MODAL ── */
+async function openModal(id, type) {
+  const res = await fetch(`${API}/${type}/${id}?api_key=${API_KEY}&append_to_response=videos,credits`);
+  const m = await res.json();
+  currentModal = { id, type, item: m };
+  const backdrop = m.backdrop_path ? IMG + m.backdrop_path : '';
+  document.getElementById('modal-img').src = backdrop;
+  document.getElementById('modal-title').innerText = m.title || m.name || '';
+  const runtime = m.runtime ? `${Math.floor(m.runtime/60)}h ${m.runtime%60}m` : (m.number_of_seasons ? `${m.number_of_seasons} Season${m.number_of_seasons>1?'s':''}` : '');
+  const year = (m.release_date || m.first_air_date || '').slice(0,4);
+  const rating = m.vote_average ? '★ ' + m.vote_average.toFixed(1) : '';
+  const genres = (m.genres||[]).slice(0,3).map(g=>g.name).join(' · ');
+  document.getElementById('modal-meta').innerHTML = `
+    <span class="rating">${rating}</span>
+    <span>${year}</span>
+    ${runtime ? `<span>${runtime}</span>` : ''}
+    ${genres ? `<span>${genres}</span>` : ''}
+  `;
+  document.getElementById('modal-overview').innerText = m.overview || '';
+  document.getElementById('modal-play').onclick = () => goWatch(id, type);
+  const inList = myList.some(x => x.id === id);
+  const mlBtn = document.getElementById('modal-mylist-btn');
+  mlBtn.innerHTML = inList
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> In My List'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add to My List';
+  mlBtn.onclick = () => {
+    const entry = { id, type, title: m.title||m.name, backdrop: m.backdrop_path, poster: m.poster_path };
+    toggleMyListById(entry);
+    closeModal();
+  };
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOnBg(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+/* ── WATCH ── */
+function goWatch(id, type) {
+  // Check local session hint first for instant redirect
+  const saved = localStorage.getItem('cinemanest-trial');
+  if (saved) {
+    try {
+      const trial = JSON.parse(saved);
+      if (new Date(trial.end) > new Date()) {
+        window.location.href = `watch.html?id=${id}&type=${type}`;
+        return;
+      }
+    } catch(e) {}
+  }
+  // Not signed in or trial expired — go to signup/signin
+  window.location.href = `signup.html?redirect=watch&id=${id}&type=${type}`;
+}
+
+/* ── MY LIST ── */
+function toggleMyList(e, item, type, style) {
+  e.stopPropagation();
+  const entry = {
+    id: item.id, type,
+    title: item.title || item.name,
+    backdrop: item.backdrop_path,
+    poster: item.poster_path
+  };
+  toggleMyListById(entry);
+}
+
+function toggleMyListById(entry) {
+  const idx = myList.findIndex(x => x.id === entry.id);
+  if (idx > -1) {
+    myList.splice(idx, 1);
+    showToast(`Removed from My List`);
+  } else {
+    myList.push(entry);
+    showToast(`Added to My List`);
+  }
+  localStorage.setItem('cinemanest-mylist', JSON.stringify(myList));
+  renderMyList();
+}
+
+function openMyList() {
+  renderMyList();
+  document.getElementById('mylist-panel').classList.add('open');
+}
+
+function closeMyList() {
+  document.getElementById('mylist-panel').classList.remove('open');
+}
+
+function renderMyList() {
+  const c = document.getElementById('mylist-content');
+  if (!myList.length) {
+    c.innerHTML = '<p class="mylist-empty">Your list is empty.<br>Add movies and shows by hovering a card.</p>';
+    return;
+  }
+  c.innerHTML = '';
+  myList.forEach(item => {
+    const imgSrc = item.backdrop ? IMG_W + item.backdrop : (item.poster ? IMG_W + item.poster : '');
+    const el = document.createElement('div');
+    el.className = 'mylist-item';
+    el.innerHTML = `
+      <img src="${imgSrc}" alt="${item.title}">
+      <div class="mylist-item-info">
+        <div class="mylist-item-title">${item.title}</div>
+        <div class="mylist-item-type">${item.type}</div>
+      </div>
+      <button class="mylist-item-rm" onclick="removeFromMyList(${item.id})" aria-label="Remove">✕</button>
+    `;
+    el.addEventListener('click', e => {
+      if (!e.target.classList.contains('mylist-item-rm')) {
+        closeMyList();
+        openModal(item.id, item.type);
+      }
+    });
+    c.appendChild(el);
+  });
+}
+
+function removeFromMyList(id) {
+  myList = myList.filter(x => x.id !== id);
+  localStorage.setItem('cinemanest-mylist', JSON.stringify(myList));
+  renderMyList();
+  showToast('Removed from My List');
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ── SEARCH ── */
+document.getElementById('search').addEventListener('input', e => {
+  clearTimeout(searchTimeout);
+  const q = e.target.value.trim();
+  const overlay = document.getElementById('search-results');
+  if (!q) { overlay.classList.remove('active'); document.body.style.overflow = ''; return; }
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  searchTimeout = setTimeout(() => doSearch(q), 380);
+});
+
+document.getElementById('search').addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    e.target.value = '';
+    document.getElementById('search-results').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+
+async function doSearch(q) {
+  document.getElementById('search-heading').innerText = `Results for "${q}"`;
+  const grid = document.getElementById('search-grid');
+  grid.innerHTML = '<p style="color:var(--muted);font-size:14px;">Searching...</p>';
+  const res = await fetch(`${API}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(q)}`);
+  const data = await res.json();
+  const items = data.results.filter(x => (x.media_type==='movie'||x.media_type==='tv') && x.poster_path);
+  if (!items.length) { grid.innerHTML = '<p style="color:var(--muted);font-size:14px;">No results found.</p>'; return; }
+  grid.innerHTML = '';
+  items.slice(0,20).forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'poster-portrait';
+    div.style.width = '100%';
+    div.style.height = '0';
+    div.style.paddingBottom = '150%';
+    div.style.position = 'relative';
+    div.innerHTML = `
+      <img src="${IMG_W+item.poster_path}" alt="${item.title||item.name}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+      <div class="card-overlay">
+        <div class="card-title">${item.title||item.name}</div>
+        <div class="card-year">${item.media_type}</div>
+      </div>
+    `;
+    div.onclick = () => {
+      document.getElementById('search').value = '';
+      document.getElementById('search-results').classList.remove('active');
+      document.body.style.overflow = '';
+      openModal(item.id, item.media_type);
+    };
+    grid.appendChild(div);
+  });
+}
+
+/* ── GENRE FILTER ── */
+async function filterGenre(genreId, btn) {
+  document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const rowsWrap = document.getElementById('rows-wrap');
+  rowsWrap.style.opacity = '0.4';
+  rowsWrap.style.transition = 'opacity .2s';
+  await new Promise(r => setTimeout(r, 200));
+  if (genreId === 0) {
+    loadAllRows();
+  } else {
+    const url = `${API}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc`;
+    const res = await fetch(url);
+    const data = await res.json();
+    ['trending-list','top-list','action-list','tv-list','horror-list','comedy-list','anime-list','african-list'].forEach(id => {
+      const c = document.getElementById(id);
+      if(c) c.innerHTML = '';
+    });
+    buildCards(data.results.slice(0,10), 'trending-list', 'movie', 'landscape');
+    buildCards(data.results.slice(10,20), 'top-list', 'movie', 'portrait');
+  }
+  rowsWrap.style.opacity = '1';
+}
+
+/* ── LOAD ALL ── */
+function loadAllRows() {
+  fetchRow(`${API}/trending/movie/week?api_key=${API_KEY}`, 'trending-list', 'movie', 'landscape');
+  fetchRow(`${API}/movie/top_rated?api_key=${API_KEY}`, 'top-list', 'movie', 'portrait');
+  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=28`, 'action-list', 'movie', 'portrait');
+  fetchRow(`${API}/tv/popular?api_key=${API_KEY}`, 'tv-list', 'tv', 'landscape');
+  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=27`, 'horror-list', 'movie', 'portrait');
+  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=35`, 'comedy-list', 'movie', 'landscape');
+  fetchRow(`${API}/discover/tv?api_key=${API_KEY}&with_genres=16&with_origin_country=JP`, 'anime-list', 'tv', 'portrait');
+  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_origin_country=KE|NG|ZA|GH&sort_by=popularity.desc`, 'african-list', 'movie', 'landscape');
+}
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeMyList();
+  }
+});
+
+/* ── SEE ALL ── */
+function seeAll(genre, name, type) {
+  const p = new URLSearchParams({ genre, name, type });
+  window.location.href = `browse.html?${p.toString()}`;
+}
+
+/* ── INIT ── */
+loadHero();
+loadAllRows();
+</script>
+
+<!-- Firebase Auth: show trial status in nav -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyARv0yl2troYUULCo-7avpF4yg5nZ-xoEE",
+    authDomain: "cinema-nest-2bf23.firebaseapp.com",
+    projectId: "cinema-nest-2bf23",
+    storageBucket: "cinema-nest-2bf23.firebasestorage.app",
+    messagingSenderId: "912475832817",
+    appId: "1:912475832817:web:7d0de62cac82a04c4e8450"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  onAuthStateChanged(auth, async (user) => {
+    const navCta       = document.getElementById('nav-cta');
+    const navBadge     = document.getElementById('nav-trial-badge');
+    const banner       = document.getElementById('trial-banner');
+    const bannerText   = document.getElementById('banner-text');
+    const daysLabel    = document.getElementById('trial-days-label');
+    const signOutBtn   = document.getElementById('nav-signout-btn');
+
+    if (user) {
+      // Hide "Start Free Trial" button
+      navCta.style.display = 'none';
+
+      // Try Firestore first, fall back to localStorage
+      let trialEnd = null;
+      let firstName = user.displayName ? user.displayName.split(' ')[0] : 'there';
+
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          trialEnd = data.trialEnd ? new Date(data.trialEnd) : null;
+          if (data.firstName) firstName = data.firstName;
+        }
+      } catch (e) {
+        // Firestore unavailable, try localStorage
+        const saved = localStorage.getItem('cinemanest-trial');
+        if (saved) {
+          const t = JSON.parse(saved);
+          trialEnd = new Date(t.end);
+          if (t.name) firstName = t.name;
+        }
+      }
+
+      if (trialEnd) {
+        const msLeft   = trialEnd - new Date();
+        const daysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+        const expired  = msLeft <= 0;
+
+        if (!expired) {
+          // Nav badge
+          navBadge.style.display = 'flex';
+          daysLabel.textContent  = `Trial · ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
+
+          // Top banner
+          banner.style.display = 'flex';
+          const opts = { month: 'short', day: 'numeric' };
+          const endStr = trialEnd.toLocaleDateString('en-KE', opts);
+          bannerText.innerHTML = `Hi <strong>${firstName}</strong> — your free trial ends <strong>${endStr}</strong>. ${daysLeft <= 3 ? '⚠️ Only ' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + ' remaining!' : `${daysLeft} days remaining.`}`;
+        } else {
+          // Trial expired — show upgrade prompt
+          navBadge.style.display = 'flex';
+          daysLabel.textContent  = 'Trial Expired';
+          document.getElementById('trial-pill-nav').style.background = 'rgba(255,255,255,.08)';
+          document.getElementById('trial-pill-nav').style.borderColor = 'rgba(255,255,255,.2)';
+          document.getElementById('trial-pill-nav').style.color = '#aaa';
+          document.querySelector('#trial-pill-nav span:last-child').style.background = '#aaa';
+
+          banner.style.display = 'flex';
+          bannerText.innerHTML = `Hi <strong>${firstName}</strong> — your free trial has expired. Subscribe to keep watching.`;
+        }
+      } else {
+        // Logged in but no trial data — just show sign out
+        navBadge.style.display = 'flex';
+        daysLabel.textContent  = `Hi, ${firstName}`;
+      }
+
+      // Sign out
+      signOutBtn.onclick = async () => {
+        await signOut(auth);
+        localStorage.removeItem('cinemanest-trial');
+        navCta.style.display   = '';
+        navBadge.style.display = 'none';
+        banner.style.display   = 'none';
+      };
+
+    } else {
+      // Not signed in — show default CTA
+      navCta.style.display   = '';
+      navBadge.style.display = 'none';
+      banner.style.display   = 'none';
+    }
+  });
+</script>
+<!-- FOOTER -->
+<footer style="border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:40px;">
+  <p style="font-size:12px;color:rgba(255,255,255,.28);line-height:1.6;max-width:600px;">
+    This site does not store any files on our server. We only link to media which is hosted on third-party services.
+  </p>
+  <a href="mailto:contact@cinemanest" style="font-size:12px;color:rgba(255,255,255,.35);text-decoration:none;white-space:nowrap;transition:color .2s;" onmouseover="this.style.color='#e50914'" onmouseout="this.style.color='rgba(255,255,255,.35)'">contact@cinemanest</a>
+</footer>
+
+</body>
+</html>
