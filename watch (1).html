@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watch — KENFLIX</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#e50914;
+  --bg:#0a0a0a;
+  --surface:#141414;
+  --surface2:#1e1e1e;
+  --text:#fff;
+  --muted:#aaa;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+/* ── TOP BAR ── */
+.topbar{
+  display:flex;align-items:center;gap:16px;
+  padding:14px 32px;
+  background:rgba(10,10,10,.95);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  position:sticky;top:0;z-index:100;
+}
+.back-btn{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);padding:8px 16px;border-radius:24px;
+  font-size:13px;cursor:pointer;font-family:inherit;
+  transition:background .2s;text-decoration:none;
+}
+.back-btn:hover{background:rgba(255,255,255,.15);}
+.back-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red);letter-spacing:2px;margin-right:auto;}
+.watch-title{
+  font-size:15px;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:300px;
+}
+
+/* ── PLAYER ── */
+.player-wrap{
+  position:relative;
+  background:#000;
+  width:100%;
+  aspect-ratio:16/9;
+  max-height:75vh;
+  overflow:hidden;
+}
+.player-wrap iframe{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  border:none;
+}
+.player-loading{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;background:#000;z-index:5;
+  transition:opacity .5s;
+}
+.spinner{
+  width:44px;height:44px;
+  border:3px solid rgba(255,255,255,.1);
+  border-top-color:var(--red);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--muted);}
+
+/* ── CONTENT AREA ── */
+.content{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:32px;
+  padding:32px;
+  max-width:1400px;
+  margin:0 auto;
+}
+@media(max-width:900px){
+  .content{grid-template-columns:1fr;padding:20px;}
+  .watch-title{max-width:160px;}
+  .topbar{padding:12px 20px;}
+}
+
+/* ── MAIN INFO ── */
+.main-info{}
+.movie-header{margin-bottom:20px;}
+.movie-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(28px,5vw,48px);
+  letter-spacing:1px;margin-bottom:8px;
+}
+.movie-meta{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  font-size:13px;color:var(--muted);margin-bottom:16px;
+}
+.badge{
+  padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.badge-red{background:var(--red);color:#fff;}
+.badge-gray{background:rgba(255,255,255,.1);color:var(--text);}
+.badge-gold{background:rgba(245,197,24,.15);color:#f5c518;}
+
+.movie-overview{
+  font-size:14px;line-height:1.75;color:#bbb;
+  margin-bottom:24px;
+}
+
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+.btn-primary{
+  background:var(--text);color:#000;
+  border:none;padding:11px 24px;border-radius:4px;
+  font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+  transition:background .2s;
+}
+.btn-primary:hover{background:#ddd;}
+.btn-secondary{
+  background:rgba(255,255,255,.12);color:#fff;
+  border:1px solid rgba(255,255,255,.15);
+  padding:11px 20px;border-radius:4px;
+  font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+  transition:background .2s;
+}
+.btn-secondary:hover{background:rgba(255,255,255,.2);}
+.btn-secondary svg,.btn-primary svg{
+  width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* ── TV SEASONS ── */
+.seasons-section{margin-top:4px;}
+.seasons-section h3{font-size:16px;font-weight:600;margin-bottom:14px;}
+.season-tabs{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;
+}
+.season-tab{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  color:var(--muted);padding:6px 14px;border-radius:20px;
+  font-size:12px;cursor:pointer;font-family:inherit;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.season-tab.active,.season-tab:hover{
+  background:var(--red);color:#fff;border-color:var(--red);
+}
+.episodes-grid{
+  display:flex;flex-direction:column;gap:8px;
+  max-height:340px;overflow-y:auto;scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.1) transparent;
+}
+.episode-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border-radius:6px;
+  background:var(--surface2);cursor:pointer;
+  border:1px solid transparent;
+  transition:background .2s,border-color .2s;
+}
+.episode-item:hover,.episode-item.active{
+  background:rgba(229,9,20,.12);border-color:rgba(229,9,20,.3);
+}
+.ep-num{
+  font-family:'Bebas Neue',sans-serif;font-size:24px;
+  color:rgba(255,255,255,.2);min-width:32px;text-align:center;
+}
+.episode-item.active .ep-num{color:var(--red);}
+.ep-info{flex:1;}
+.ep-title{font-size:13px;font-weight:500;}
+.ep-air{font-size:11px;color:var(--muted);margin-top:2px;}
+.ep-play{
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--text);flex-shrink:0;
+}
+.ep-play svg{width:12px;height:12px;fill:currentColor;}
+
+/* ── CAST ── */
+.cast-section h3{font-size:16px;font-weight:600;margin:24px 0 12px;}
+.cast-list{display:flex;gap:10px;flex-wrap:wrap;}
+.cast-chip{
+  background:var(--surface2);border:1px solid rgba(255,255,255,.06);
+  padding:6px 12px;border-radius:20px;font-size:12px;color:var(--muted);
+}
+
+/* ── SIDEBAR ── */
+.sidebar{}
+.related-section h3{font-size:16px;font-weight:600;margin-bottom:14px;}
+.related-list{display:flex;flex-direction:column;gap:12px;}
+.related-item{
+  display:flex;gap:12px;cursor:pointer;
+  border-radius:6px;padding:8px;
+  transition:background .2s;
+}
+.related-item:hover{background:var(--surface2);}
+.related-img{
+  width:100px;height:60px;border-radius:4px;
+  object-fit:cover;flex-shrink:0;
+  background:var(--surface2);
+}
+.related-info{flex:1;min-width:0;}
+.related-title{font-size:13px;font-weight:500;line-height:1.3;margin-bottom:4px;}
+.related-year{font-size:11px;color:var(--muted);}
+.related-rating{font-size:11px;color:#f5c518;}
+
+/* ── ALT SOURCES ── */
+.alt-sources{margin-top:20px;}
+.alt-sources h4{font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:400;}
+.source-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.source-btn{
+  background:var(--surface2);border:1px solid rgba(255,255,255,.08);
+  color:var(--muted);padding:6px 12px;border-radius:4px;
+  font-size:12px;cursor:pointer;font-family:inherit;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.source-btn:hover,.source-btn.active{
+  background:rgba(229,9,20,.15);color:var(--red);border-color:rgba(229,9,20,.3);
+}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#222;border:1px solid rgba(255,255,255,.1);
+  color:#fff;font-size:13px;padding:10px 20px;border-radius:24px;
+  z-index:3000;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="back-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </a>
+  <div class="logo">KENFLIX</div>
+  <div class="watch-title" id="watch-title">Loading...</div>
+</div>
+
+<!-- PLAYER -->
+<div class="player-wrap" id="player-wrap">
+  <div class="player-loading" id="player-loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading stream...</div>
+  </div>
+  <iframe id="player" allowfullscreen allow="fullscreen; autoplay"></iframe>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- MAIN -->
+  <div class="main-info">
+    <div class="movie-header">
+      <div class="movie-title" id="movie-title">—</div>
+      <div class="movie-meta" id="movie-meta"></div>
+      <p class="movie-overview" id="movie-overview"></p>
+      <div class="action-row">
+        <button class="btn-secondary" onclick="toggleMyList()" id="mylist-btn">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          My List
+        </button>
+        <button class="btn-secondary" onclick="shareTitle()">
+          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share
+        </button>
+      </div>
+    </div>
+
+    <!-- TV: seasons + episodes -->
+    <div class="seasons-section" id="seasons-section" style="display:none">
+      <h3>Episodes</h3>
+      <div class="season-tabs" id="season-tabs"></div>
+      <div class="episodes-grid" id="episodes-grid"></div>
+    </div>
+
+    <!-- Cast -->
+    <div class="cast-section">
+      <h3>Cast</h3>
+      <div class="cast-list" id="cast-list"></div>
+    </div>
+
+    <!-- Alt sources -->
+    <div class="alt-sources">
+      <h4>Playback source</h4>
+      <div class="source-btns" id="source-btns"></div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="related-section">
+      <h3>More Like This</h3>
+      <div class="related-list" id="related-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_KEY = "1d3ae144acfb6bfcb25f70361cedcf29";
+const API = "https://api.themoviedb.org/3";
+const IMG_W = "https://image.tmdb.org/t/p/w500";
+
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id');
+const type = params.get('type');
+
+let myList = JSON.parse(localStorage.getItem('kenflix-mylist') || '[]');
+let currentSeason = 1;
+let currentEpisode = 1;
+let currentSource = 0;
+let movieData = null;
+
+const SOURCES = [
+  { label: 'Source 1', movie: id => `https://vidsrc.to/embed/movie/${id}`, tv: (id,s,e) => `https://vidsrc.to/embed/tv/${id}/${s}/${e}` },
+  { label: 'Source 2', movie: id => `https://vidsrc.me/embed/movie?tmdb=${id}`, tv: (id,s,e) => `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}` },
+  { label: 'Source 3', movie: id => `https://embed.su/embed/movie/${id}`, tv: (id,s,e) => `https://embed.su/embed/tv/${id}/${s}/${e}` },
+];
+
+/* ── PLAYER ── */
+function buildSrc() {
+  const src = type === 'tv'
+    ? SOURCES[currentSource].tv(id, currentSeason, currentEpisode)
+    : SOURCES[currentSource].movie(id);
+  return src;
+}
+
+function loadPlayer() {
+  const iframe = document.getElementById('player');
+  document.getElementById('player-loading').style.opacity = '1';
+  iframe.src = buildSrc();
+  iframe.onload = () => {
+    setTimeout(() => { document.getElementById('player-loading').style.opacity = '0'; }, 600);
+  };
+}
+
+/* ── SOURCE BUTTONS ── */
+function buildSourceBtns() {
+  const c = document.getElementById('source-btns');
+  c.innerHTML = '';
+  SOURCES.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'source-btn' + (i === currentSource ? ' active' : '');
+    btn.innerText = s.label;
+    btn.onclick = () => {
+      currentSource = i;
+      buildSourceBtns();
+      loadPlayer();
+    };
+    c.appendChild(btn);
+  });
+}
+
+/* ── FETCH DETAILS ── */
+async function loadDetails() {
+  const res = await fetch(`${API}/${type}/${id}?api_key=${API_KEY}&append_to_response=credits,similar`);
+  movieData = await res.json();
+
+  const title = movieData.title || movieData.name || '';
+  document.title = `${title} — KENFLIX`;
+  document.getElementById('watch-title').innerText = title;
+  document.getElementById('movie-title').innerText = title;
+  document.getElementById('movie-overview').innerText = movieData.overview || '';
+
+  const year = (movieData.release_date || movieData.first_air_date || '').slice(0,4);
+  const rating = movieData.vote_average ? movieData.vote_average.toFixed(1) : '';
+  const runtime = movieData.runtime
+    ? `${Math.floor(movieData.runtime/60)}h ${movieData.runtime%60}m`
+    : (movieData.number_of_seasons ? `${movieData.number_of_seasons} season${movieData.number_of_seasons>1?'s':''}` : '');
+  const genres = (movieData.genres||[]).slice(0,3).map(g=>g.name).join(' · ');
+
+  document.getElementById('movie-meta').innerHTML = `
+    <span class="badge badge-red">${type === 'tv' ? 'TV Show' : 'Movie'}</span>
+    ${year ? `<span>${year}</span>` : ''}
+    ${runtime ? `<span>${runtime}</span>` : ''}
+    ${rating ? `<span class="badge badge-gold">★ ${rating}</span>` : ''}
+    ${genres ? `<span>${genres}</span>` : ''}
+  `;
+
+  // Cast
+  const cast = (movieData.credits?.cast||[]).slice(0,8);
+  const castEl = document.getElementById('cast-list');
+  castEl.innerHTML = cast.length
+    ? cast.map(c=>`<span class="cast-chip">${c.name}</span>`).join('')
+    : '<span style="color:var(--muted);font-size:13px;">No cast info available.</span>';
+
+  // My list button
+  updateMyListBtn();
+
+  // TV seasons
+  if (type === 'tv') {
+    document.getElementById('seasons-section').style.display = 'block';
+    buildSeasonTabs(movieData.number_of_seasons || 1);
+    loadEpisodes(1);
+  }
+
+  // Related
+  const related = (movieData.similar?.results||[]).filter(x=>x.backdrop_path).slice(0,8);
+  const relEl = document.getElementById('related-list');
+  relEl.innerHTML = '';
+  related.forEach(item => {
+    const year = (item.release_date||item.first_air_date||'').slice(0,4);
+    const rating = item.vote_average ? '★ '+item.vote_average.toFixed(1) : '';
+    const div = document.createElement('div');
+    div.className = 'related-item';
+    div.innerHTML = `
+      <img class="related-img" src="${IMG_W+item.backdrop_path}" alt="${item.title||item.name}" loading="lazy">
+      <div class="related-info">
+        <div class="related-title">${item.title||item.name}</div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          ${year?`<span class="related-year">${year}</span>`:''}
+          ${rating?`<span class="related-rating">${rating}</span>`:''}
+        </div>
+      </div>
+    `;
+    div.onclick = () => window.location.href = `watch.html?id=${item.id}&type=${type}`;
+    relEl.appendChild(div);
+  });
+}
+
+/* ── SEASONS ── */
+function buildSeasonTabs(count) {
+  const c = document.getElementById('season-tabs');
+  c.innerHTML = '';
+  for (let i = 1; i <= count; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'season-tab' + (i === 1 ? ' active' : '');
+    btn.innerText = `Season ${i}`;
+    btn.onclick = () => {
+      currentSeason = i;
+      document.querySelectorAll('.season-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentEpisode = 1;
+      loadEpisodes(i);
+    };
+    c.appendChild(btn);
+  }
+}
+
+async function loadEpisodes(season) {
+  const grid = document.getElementById('episodes-grid');
+  grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px;">Loading episodes...</div>';
+  try {
+    const res = await fetch(`${API}/tv/${id}/season/${season}?api_key=${API_KEY}`);
+    const data = await res.json();
+    grid.innerHTML = '';
+    (data.episodes||[]).forEach((ep, i) => {
+      const div = document.createElement('div');
+      div.className = 'episode-item' + (ep.episode_number === currentEpisode ? ' active' : '');
+      div.innerHTML = `
+        <div class="ep-num">${ep.episode_number}</div>
+        <div class="ep-info">
+          <div class="ep-title">${ep.name||`Episode ${ep.episode_number}`}</div>
+          <div class="ep-air">${ep.air_date||''}</div>
+        </div>
+        <button class="ep-play" aria-label="Play episode ${ep.episode_number}">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+      `;
+      div.onclick = () => {
+        currentEpisode = ep.episode_number;
+        document.querySelectorAll('.episode-item').forEach(e=>e.classList.remove('active'));
+        div.classList.add('active');
+        loadPlayer();
+        window.scrollTo({top:0,behavior:'smooth'});
+      };
+      grid.appendChild(div);
+    });
+  } catch(e) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px;">Could not load episodes.</div>';
+  }
+}
+
+/* ── MY LIST ── */
+function updateMyListBtn() {
+  const inList = myList.some(x => x.id == id);
+  const btn = document.getElementById('mylist-btn');
+  btn.innerHTML = inList
+    ? `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg> In My List`
+    : `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> My List`;
+}
+
+function toggleMyList() {
+  if (!movieData) return;
+  const idx = myList.findIndex(x => x.id == id);
+  if (idx > -1) {
+    myList.splice(idx, 1);
+    showToast('Removed from My List');
+  } else {
+    myList.push({ id: parseInt(id), type, title: movieData.title||movieData.name, backdrop: movieData.backdrop_path, poster: movieData.poster_path });
+    showToast('Added to My List');
+  }
+  localStorage.setItem('kenflix-mylist', JSON.stringify(myList));
+  updateMyListBtn();
+}
+
+/* ── SHARE ── */
+function shareTitle() {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title: document.title, url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => showToast('Link copied!'));
+  }
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ── INIT ── */
+buildSourceBtns();
+loadPlayer();
+loadDetails();
+</script>
+</body>
+</html>
