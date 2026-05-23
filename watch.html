@@ -26,17 +26,14 @@ z-index:9999;
 
 <script>
 
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
-const type = params.get("type");
+const params=new URLSearchParams(window.location.search);
+const id=params.get("id");
+const type=params.get("type");
 
-/* 🔥 WORKING PROVIDER */
-if(type === "tv"){
-document.getElementById("player").src =
-`https://vidsrc.to/embed/tv/${id}/1/1`;
+if(type==="tv"){
+document.getElementById("player").src=`https://vidsrc.to/embed/tv/${id}/1/1`;
 }else{
-document.getElementById("player").src =
-`https://vidsrc.to/embed/movie/${id}`;
+document.getElementById("player").src=`https://vidsrc.to/embed/movie/${id}`;
 }
 
 </script>
