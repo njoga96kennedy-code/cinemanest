@@ -116,6 +116,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;ove
 }
 .nav-signout:hover{border-color:rgba(255,255,255,.3);color:#fff;}
 
+.nav-pay-now{
+  background:var(--red);border:none;color:#fff;
+  padding:8px 16px;border-radius:20px;font-family:inherit;font-size:13px;
+  font-weight:600;cursor:pointer;transition:background .2s,transform .15s;
+  display:none;white-space:nowrap;
+}
+.nav-pay-now:hover{background:var(--red-dark);transform:scale(1.03);}
+.nav-pay-now.show{display:inline-block;}
+
 /* ─── SEARCH OVERLAY ─── */
 #search-results{
   position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;
@@ -593,7 +602,7 @@ footer a:hover{color:var(--red);}
 <nav class="nav" id="nav">
   <a class="logo" href="index.html">
     <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M19.82 2H4.18A2.18 2.18 0 0 0 2 4.18v15.64A2.18 2.18 0 0 0 4.18 22h15.64A2.18 2.18 0 0 0 22 19.82V4.18A2.18 2.18 0 0 0 19.82 2zM12 17.5L6.5 12 12 6.5l5.5 5.5L12 17.5z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M19.82 2H4.18A2.18 2.18 0 0 0 2 4.18v15.64A2.18 2.18 0 0 0 4.18 22h15.64A2.18 2.18 0 0 0 22 19.82V4.18A2.18 2.18 0 0 0 19.82 2zM12 17.5L6.5 12 12 6.5l5.5 5[...]
     </div>
     CINEMA<span style="color:#fff">NEST</span>
   </a>
@@ -610,6 +619,7 @@ footer a:hover{color:var(--red);}
         <span class="trial-dot"></span>
         <span id="trial-days-label">Trial</span>
       </div>
+      <button class="nav-pay-now" id="nav-pay-now-btn" onclick="goToPayment()">Pay Now</button>
       <button class="nav-signout" id="nav-signout-btn">Sign Out</button>
     </div>
     <button class="nav-btn" onclick="openMyList()">
@@ -810,7 +820,7 @@ footer a:hover{color:var(--red);}
           Trailer
         </button>
         <button class="btn-info" id="modal-mylist-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2[...]
           Add to My List
         </button>
       </div>
@@ -857,6 +867,36 @@ let heroMovie = null;
 let myList = JSON.parse(localStorage.getItem('cinemanest-mylist') || '[]');
 let searchTimeout = null;
 let currentModal = null;
+
+/* ── CHECK TRIAL STATUS ON LOAD ── */
+window.addEventListener('DOMContentLoaded', () => {
+  checkTrialStatus();
+});
+
+function checkTrialStatus() {
+  const saved = localStorage.getItem('cinemanest-trial');
+  if (saved) {
+    const trial = JSON.parse(saved);
+    const msLeft = new Date(trial.end) - new Date();
+    
+    if (msLeft <= 0) {
+      // Trial expired - redirect to pricing/payment
+      window.location.href = 'pricing.html';
+      return;
+    }
+    
+    // Trial active - show pay now button
+    document.getElementById('nav-cta').style.display = 'none';
+    document.getElementById('nav-trial-badge').style.display = 'flex';
+    const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+    document.getElementById('trial-days-label').textContent = `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
+    document.getElementById('nav-pay-now-btn').classList.add('show');
+  }
+}
+
+function goToPayment() {
+  window.location.href = 'pricing.html';
+}
 
 /* ── NAV ── */
 window.addEventListener('scroll', () => {
@@ -998,15 +1038,12 @@ async function openModal(id, type) {
   }
 
   const inList = myList.some(x => x.id === id);
-  const mlBtn = document.getElementById('modal-mylist-btn');
-  mlBtn.innerHTML = inList
-    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> In My List'
-    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add to My List';
-  mlBtn.onclick = () => {
-    const entry = { id, type, title: m.title||m.name, backdrop: m.backdrop_path, poster: m.poster_path };
-    toggleMyListById(entry);
-    closeModal();
-  };
+  const listBtn = document.getElementById('modal-mylist-btn');
+  listBtn.textContent = inList ? '✓ In My List' : '+ Add to My List';
+  listBtn.style.background = inList ? 'rgba(229,9,20,.2)' : 'rgba(255,255,255,.12)';
+  listBtn.style.color = inList ? 'var(--red)' : '#fff';
+  listBtn.onclick = () => toggleMyList(null, m, type, 'portrait');
+
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1015,314 +1052,120 @@ function closeModal() {
   document.getElementById('modal').classList.remove('open');
   document.body.style.overflow = '';
 }
+
 function closeModalOnBg(e) {
   if (e.target === document.getElementById('modal')) closeModal();
 }
 
-/* ── WATCH ── */
-// Cached auth state — set by Firebase onAuthStateChanged below
-window._authUser = undefined; // undefined = not yet resolved, null = signed out, object = signed in
-
-function goWatch(id, type) {
-  // If auth is already resolved, act immediately
-  if (window._authUser !== undefined) {
-    _doGoWatch(id, type, window._authUser);
-    return;
-  }
-  // Auth not yet resolved — wait briefly for Firebase to confirm session
-  const btn = event?.currentTarget;
-  if (btn) { btn.style.opacity = '0.6'; btn.style.pointerEvents = 'none'; }
-  const timeout = setTimeout(() => _doGoWatch(id, type, null), 3000);
-  const unsub = window._authUnsub || (() => {});
-  // Poll for auth state
-  const poll = setInterval(() => {
-    if (window._authUser !== undefined) {
-      clearInterval(poll);
-      clearTimeout(timeout);
-      if (btn) { btn.style.opacity = ''; btn.style.pointerEvents = ''; }
-      _doGoWatch(id, type, window._authUser);
-    }
-  }, 100);
-}
-
-function _doGoWatch(id, type, user) {
-  if (user) {
-    // Logged in — go straight to watch
-    window.location.href = `watch.html?id=${id}&type=${type}`;
-    return;
-  }
-  // Not logged in — check localStorage as fallback (e.g. trial set before refresh)
-  const saved = localStorage.getItem('cinemanest-trial');
-  if (saved) {
-    try {
-      const trial = JSON.parse(saved);
-      if (new Date(trial.end) > new Date()) {
-        window.location.href = `watch.html?id=${id}&type=${type}`;
-        return;
-      }
-    } catch(e) {}
-  }
-  window.location.href = `signup.html?redirect=watch&id=${id}&type=${type}`;
-}
-
 /* ── MY LIST ── */
 function toggleMyList(e, item, type, style) {
-  e.stopPropagation();
-  const entry = { id: item.id, type, title: item.title || item.name, backdrop: item.backdrop_path, poster: item.poster_path };
-  toggleMyListById(entry);
-}
-
-function toggleMyListById(entry) {
-  const idx = myList.findIndex(x => x.id === entry.id);
-  if (idx > -1) { myList.splice(idx, 1); showToast('Removed from My List'); }
-  else { myList.push(entry); showToast('Added to My List'); }
+  if (e) e.stopPropagation();
+  const id = item.id;
+  const existing = myList.findIndex(x => x.id === id);
+  if (existing >= 0) {
+    myList.splice(existing, 1);
+  } else {
+    myList.push({...item, type, style});
+  }
   localStorage.setItem('cinemanest-mylist', JSON.stringify(myList));
-  renderMyList();
+  refreshMyListUI();
+  showToast(existing >= 0 ? 'Removed from My List' : 'Added to My List');
 }
 
 function openMyList() {
-  renderMyList();
+  refreshMyListUI();
   document.getElementById('mylist-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
+
 function closeMyList() {
   document.getElementById('mylist-panel').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
-function renderMyList() {
-  const c = document.getElementById('mylist-content');
-  if (!myList.length) {
-    c.innerHTML = '<p class="mylist-empty">Your list is empty.<br>Add movies and shows by hovering a card.</p>';
+function refreshMyListUI() {
+  const content = document.getElementById('mylist-content');
+  if (myList.length === 0) {
+    content.innerHTML = '<div class="mylist-empty">Your list is empty.<br>Add movies & shows to watch later!</div>';
     return;
   }
-  c.innerHTML = '';
-  myList.forEach(item => {
-    const imgSrc = item.backdrop ? IMG_W + item.backdrop : (item.poster ? IMG_W + item.poster : '');
-    const el = document.createElement('div');
-    el.className = 'mylist-item';
-    el.innerHTML = `
-      <img src="${imgSrc}" alt="${item.title}">
-      <div class="mylist-item-info">
-        <div class="mylist-item-title">${item.title}</div>
-        <div class="mylist-item-type">${item.type === 'tv' ? 'TV Series' : 'Movie'}</div>
+  content.innerHTML = myList.map(item => {
+    const img = item.poster_path ? IMG_W + item.poster_path : '';
+    const title = item.title || item.name || 'Unknown';
+    const type = item.type === 'movie' ? 'Movie' : 'Show';
+    return `
+      <div class="mylist-item" onclick="openModal(${item.id},'${item.type}');closeMyList();">
+        ${img ? `<img src="${img}" alt="">` : '<div style="width:72px;height:44px;background:var(--surface2);border-radius:6px;flex-shrink:0;"></div>'}
+        <div class="mylist-item-info">
+          <div class="mylist-item-title">${title}</div>
+          <div class="mylist-item-type">${type}</div>
+        </div>
+        <button class="mylist-item-rm" onclick="toggleMyList(event,${JSON.stringify(item)},'${item.type}','${item.style}')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
-      <button class="mylist-item-rm" onclick="removeFromMyList(${item.id})" aria-label="Remove">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
     `;
-    el.addEventListener('click', e => {
-      if (!e.target.closest('.mylist-item-rm')) { closeMyList(); openModal(item.id, item.type); }
-    });
-    c.appendChild(el);
-  });
+  }).join('');
 }
 
-function removeFromMyList(id) {
-  myList = myList.filter(x => x.id !== id);
-  localStorage.setItem('cinemanest-mylist', JSON.stringify(myList));
-  renderMyList();
-  showToast('Removed from My List');
+/* ── FILTER GENRE ── */
+function filterGenre(genreId, el) {
+  document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  if (genreId === 0) {
+    loadTrending();
+  } else {
+    fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc`, 'trending-list', 'movie', 'landscape');
+  }
 }
+
+/* ── WATCH HANDLERS ── */
+function goWatch(id, type) {
+  const saved = localStorage.getItem('cinemanest-trial');
+  if (!saved) {
+    window.location.href = `signup.html?redirect=watch&id=${id}&type=${type}`;
+  } else {
+    window.location.href = `watch.html?id=${id}&type=${type}`;
+  }
+}
+
+/* ── TRENDING ── */
+function loadTrending() {
+  fetchRow(`${API}/trending/movie/week?api_key=${API_KEY}`, 'trending-list', 'movie', 'landscape');
+}
+
+/* ── INIT ── */
+loadHero();
+loadTrending();
+fetchRow(`${API}/movie/top_rated?api_key=${API_KEY}`, 'top-list', 'movie', 'portrait');
+fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=28&sort_by=popularity.desc`, 'action-list', 'movie', 'landscape');
+fetchRow(`${API}/tv/popular?api_key=${API_KEY}`, 'tv-list', 'tv', 'portrait');
+fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=27&sort_by=popularity.desc`, 'horror-list', 'movie', 'landscape');
+fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=35&sort_by=popularity.desc`, 'comedy-list', 'movie', 'landscape');
+fetchRow(`${API}/tv/popular?api_key=${API_KEY}&with_genres=16`, 'anime-list', 'tv', 'portrait');
+fetchRow(`${API}/discover/movie?api_key=${API_KEY}&region=NG&sort_by=popularity.desc`, 'african-list', 'movie', 'landscape');
+
+/* ── SEE ALL PAGES ── */
+window.seeAll = (genre, title, type) => {
+  window.location.href = `browse.html?genre=${genre}&title=${title}&type=${type}`;
+};
 
 /* ── TOAST ── */
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.innerText = msg;
+  t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/* ── SEARCH ── */
-searchInput.addEventListener('input', e => {
-  clearTimeout(searchTimeout);
-  const q = e.target.value.trim();
-  const overlay = document.getElementById('search-results');
-  if (!q) { overlay.classList.remove('active'); document.body.style.overflow = ''; return; }
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-  searchTimeout = setTimeout(() => doSearch(q), 380);
-});
-
-searchInput.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    searchInput.value = '';
-    document.getElementById('search-results').classList.remove('active');
-    document.body.style.overflow = '';
-    searchWrap.classList.remove('open');
+/* ── SIGN OUT ── */
+document.getElementById('nav-signout-btn')?.addEventListener('click', () => {
+  if (confirm('Sign out and return to home?')) {
+    localStorage.removeItem('cinemanest-trial');
+    window.location.href = 'index.html';
   }
 });
-
-async function doSearch(q) {
-  document.getElementById('search-heading').innerText = `Results for "${q}"`;
-  const grid = document.getElementById('search-grid');
-  grid.innerHTML = '<p style="color:var(--muted);font-size:14px;">Searching…</p>';
-  const res = await fetch(`${API}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(q)}`);
-  const data = await res.json();
-  const items = data.results.filter(x => (x.media_type==='movie'||x.media_type==='tv') && x.poster_path);
-  if (!items.length) { grid.innerHTML = '<p style="color:var(--muted);font-size:14px;">No results found.</p>'; return; }
-  grid.innerHTML = '';
-  items.slice(0,20).forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'poster-portrait';
-    div.style.cssText = 'width:100%;height:0;padding-bottom:150%;position:relative;';
-    div.innerHTML = `
-      <img src="${IMG_W+item.poster_path}" alt="${item.title||item.name}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
-      <div class="card-overlay"><div class="card-title">${item.title||item.name}</div><div class="card-year">${item.media_type}</div></div>
-    `;
-    div.onclick = () => {
-      searchInput.value = '';
-      document.getElementById('search-results').classList.remove('active');
-      document.body.style.overflow = '';
-      searchWrap.classList.remove('open');
-      openModal(item.id, item.media_type);
-    };
-    grid.appendChild(div);
-  });
-}
-
-/* ── GENRE FILTER ── */
-async function filterGenre(genreId, btn) {
-  document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  const rowsWrap = document.getElementById('rows-wrap');
-  rowsWrap.style.opacity = '0.3';
-  await new Promise(r => setTimeout(r, 200));
-  if (genreId === 0) {
-    loadAllRows();
-  } else {
-    const url = `${API}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc`;
-    const res = await fetch(url);
-    const data = await res.json();
-    ['trending-list','top-list','action-list','tv-list','horror-list','comedy-list','anime-list','african-list'].forEach(id => {
-      const c = document.getElementById(id); if(c) c.innerHTML = '';
-    });
-    buildCards(data.results.slice(0,10), 'trending-list', 'movie', 'landscape');
-    buildCards(data.results.slice(10,20), 'top-list', 'movie', 'portrait');
-  }
-  rowsWrap.style.opacity = '1';
-}
-
-/* ── LOAD ALL ── */
-function loadAllRows() {
-  fetchRow(`${API}/trending/movie/week?api_key=${API_KEY}`, 'trending-list', 'movie', 'landscape');
-  fetchRow(`${API}/movie/top_rated?api_key=${API_KEY}`, 'top-list', 'movie', 'portrait');
-  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=28`, 'action-list', 'movie', 'portrait');
-  fetchRow(`${API}/tv/popular?api_key=${API_KEY}`, 'tv-list', 'tv', 'landscape');
-  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=27`, 'horror-list', 'movie', 'portrait');
-  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_genres=35`, 'comedy-list', 'movie', 'landscape');
-  fetchRow(`${API}/discover/tv?api_key=${API_KEY}&with_genres=16&with_origin_country=JP`, 'anime-list', 'tv', 'portrait');
-  fetchRow(`${API}/discover/movie?api_key=${API_KEY}&with_origin_country=KE|NG|ZA|GH&sort_by=popularity.desc`, 'african-list', 'movie', 'landscape');
-}
-
-/* ── SEE ALL ── */
-function seeAll(genre, name, type) {
-  window.location.href = `browse.html?${new URLSearchParams({genre,name,type}).toString()}`;
-}
-
-/* ── KEYBOARD ── */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeMyList(); closeTrailer(); }
-});
-
-/* ── INIT ── */
-loadHero();
-loadAllRows();
 </script>
 
-<!-- Firebase Auth -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyARv0yl2troYUULCo-7avpF4yg5nZ-xoEE",
-    authDomain: "cinema-nest-2bf23.firebaseapp.com",
-    projectId: "cinema-nest-2bf23",
-    storageBucket: "cinema-nest-2bf23.firebasestorage.app",
-    messagingSenderId: "912475832817",
-    appId: "1:912475832817:web:7d0de62cac82a04c4e8450"
-  };
-
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
-  const IMG_W = 'https://image.tmdb.org/t/p/w500';
-
-  async function loadWatchHistory(uid) {
-    try {
-      const ref = collection(db, 'users', uid, 'watchHistory');
-      const q   = query(ref, orderBy('watchedAt', 'desc'), limit(20));
-      const snap = await getDocs(q);
-      if (snap.empty) return;
-      const items = snap.docs.map(d => d.data());
-      const list  = document.getElementById('watched-list');
-      list.innerHTML = '';
-      items.forEach(item => {
-        const img   = item.backdrop ? IMG_W + item.backdrop : (item.poster ? IMG_W + item.poster : '');
-        const title = item.title || 'Unknown';
-        const type  = item.mediaType || 'movie';
-        const div = document.createElement('div');
-        div.className = 'poster-landscape';
-        div.innerHTML = `
-          ${img ? `<img src="${img}" alt="${title}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` : `<div style="width:100%;height:100%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);">${title}</div>`}
-          <div class="card-overlay"><div class="card-title">${title}</div><div class="card-year">${type==='tv'?'TV Series':'Movie'}</div></div>
-          <div class="card-play-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="#fff"/></svg></div>`;
-        div.onclick = () => { window.location.href = `watch.html?id=${item.mediaId}&type=${type}`; };
-        list.appendChild(div);
-      });
-      document.getElementById('row-watched').style.display = 'block';
-    } catch (e) { console.warn('Could not load watch history:', e); }
-  }
-
-  onAuthStateChanged(auth, async (user) => {
-    // Expose auth state globally so goWatch() can use it without waiting
-    window._authUser = user || null;
-
-    const navCta    = document.getElementById('nav-cta');
-    const navBadge  = document.getElementById('nav-trial-badge');
-    const daysLabel = document.getElementById('trial-days-label');
-    const pill      = document.getElementById('trial-pill-nav');
-    const signOutBtn= document.getElementById('nav-signout-btn');
-
-    if (user) {
-      navCta.style.display = 'none';
-      navBadge.style.display = 'flex';
-      let trialEnd = null;
-      try {
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
-          trialEnd = data.trialEnd ? new Date(data.trialEnd) : null;
-        }
-      } catch {
-        const saved = localStorage.getItem('cinemanest-trial');
-        if (saved) { try { trialEnd = new Date(JSON.parse(saved).end); } catch {} }
-      }
-      if (trialEnd) {
-        const msLeft = trialEnd - new Date();
-        const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
-        if (msLeft <= 0) {
-          daysLabel.textContent = 'Trial Expired';
-        } else {
-          daysLabel.textContent = `${daysLeft}d left`;
-        }
-      } else {
-        daysLabel.textContent = 'Member';
-      }
-      signOutBtn.onclick = async () => {
-        await signOut(auth);
-        window._authUser = null;
-        localStorage.removeItem('cinemanest-trial');
-        navCta.style.display = '';
-        navBadge.style.display = 'none';
-        document.getElementById('row-watched').style.display = 'none';
-      };
-      loadWatchHistory(user.uid);
-    } else {
-      navCta.style.display = '';
-      navBadge.style.display = 'none';
-    }
-  });
-</script>
 </body>
 </html>
