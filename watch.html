@@ -72,11 +72,11 @@ body { background: #080808; color: var(--text); font-family: 'DM Sans', sans-ser
 }
 .player-loading p { font-size: 13px; color: var(--muted); }
 
-/* ── FULLSCREEN BUTTON ── */
+/* ── FULLSCREEN TOGGLE BUTTON (POSITIONED ON LEFT) ── */
 .fullscreen-btn {
   position: absolute;
   bottom: 16px;
-  right: 16px;
+  left: 16px; /* Moved to left side */
   z-index: 20;
   background: rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -315,7 +315,6 @@ footer a:hover { color: var(--red); }
         <div class="spinner"></div>
         <p id="player-loading-msg">Connecting…</p>
       </div>
-      
       <iframe id="player-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen" style="opacity:0;transition:opacity .4s;"></iframe>
       
       <button class="fullscreen-btn" onclick="togglePlayerFullscreen()">
@@ -420,11 +419,10 @@ footer a:hover { color: var(--red); }
   let currentEpisode = 1;
   let mediaData      = null;
 
-  // Optimized high-speed video rendering cluster endpoint
   function buildSrc() {
     return mediaType === 'tv'
-      ? `https://vidlink.pro/tv/${mediaId}/${currentSeason}/${currentEpisode}`
-      : `https://vidlink.pro/movie/${mediaId}`;
+      ? `https://multiembed.mov/?tmdb=1&video_id=${mediaId}&s=${currentSeason}&e=${currentEpisode}`
+      : `https://multiembed.mov/?tmdb=1&video_id=${mediaId}`;
   }
 
   async function loadPlayer() {
@@ -456,7 +454,6 @@ footer a:hover { color: var(--red); }
     }, 8000);
   }
 
-  // Cross-browser Fullscreen Toggle Logic
   window.togglePlayerFullscreen = () => {
     const wrap = document.getElementById('player-frame-wrap');
     if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
