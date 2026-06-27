@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cinema Nest – Plans & Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #e50914;
+  --red-dark: #b0060f;
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1e1e1e;
+  --text: #fff;
+  --muted: #aaa;
+  --radius: 6px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080808; color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; min-height: 100vh; }
+
+/* ─── NAV ─── */
+.nav {
+  position: fixed; top: 0; width: 100%; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 48px;
+  background: rgba(8,8,8,.96); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--red); letter-spacing: 2px; cursor: pointer; text-decoration: none; }
+.nav-back { color: var(--muted); font-size: 13px; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+.nav-back:hover { color: var(--text); }
+.nav-back svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* ─── HERO ─── */
+.hero {
+  padding: 140px 48px 70px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(229,9,20,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(229,9,20,.15); border: 1px solid rgba(229,9,20,.3);
+  color: var(--red); font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
+}
+.hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.7)} }
+.hero h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 8vw, 96px);
+  line-height: .92; letter-spacing: 1px; margin-bottom: 20px;
+}
+.hero h1 span { color: var(--red); }
+.hero p { font-size: 17px; color: var(--muted); line-height: 1.7; max-width: 520px; margin: 0 auto 40px; }
+.trial-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1px solid rgba(255,255,255,.1);
+  padding: 10px 20px; border-radius: 30px; font-size: 13px; color: #ccc;
+}
+.trial-badge strong { color: #fff; }
+
+/* ─── PRICING SECTION ─── */
+.pricing-section { padding: 60px 48px 100px; max-width: 860px; margin: 0 auto; }
+
+.section-label {
+  text-align: center; margin-bottom: 40px;
+}
+.section-label h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px; letter-spacing: 1px; margin-bottom: 8px;
+}
+.section-label p { font-size: 14px; color: var(--muted); }
+
+/* ─── DURATION CARDS ─── */
+.duration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.duration-card {
+  background: var(--surface);
+  border: 2px solid rgba(255,255,255,.07);
+  border-radius: 14px; padding: 28px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: border-color .25s, background .25s, transform .25s, box-shadow .25s;
+  user-select: none;
+}
+.duration-card:hover {
+  border-color: rgba(229,9,20,.5);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.4);
+}
+.duration-card.selected {
+  border-color: var(--red);
+  background: linear-gradient(135deg, #1a0808 0%, #141414 100%);
+  box-shadow: 0 0 0 1px var(--red), 0 20px 50px rgba(229,9,20,.15);
+}
+.duration-card.selected::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--red-dark), var(--red), #ff4444);
+}
+.duration-card.featured-duration {
+  grid-column: span 1;
+}
+
+/* Popular badge */
+.pop-badge {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--red); color: #fff;
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 10px;
+}
+
+/* Selected checkmark */
+.check-ring {
+  position: absolute; top: 16px; left: 16px;
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, border-color .2s;
+}
+.duration-card.selected .check-ring {
+  background: var(--red); border-color: var(--red);
+}
+.check-ring svg { width: 12px; height: 12px; stroke: #fff; fill: none; stroke-width: 3; opacity: 0; transition: opacity .2s; }
+.duration-card.selected .check-ring svg { opacity: 1; }
+
+.duration-header { margin-top: 8px; margin-bottom: 16px; }
+.duration-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; letter-spacing: 1px; margin-bottom: 2px;
+}
+.duration-sub { font-size: 12px; color: var(--muted); }
+
+.duration-price-row { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 4px; }
+.duration-currency { font-size: 16px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+.duration-amount { font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: 1; letter-spacing: -1px; }
+.duration-period { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+
+.duration-per-month {
+  font-size: 12px; color: var(--muted); margin-bottom: 16px; min-height: 18px;
+}
+.duration-per-month span { color: #4ade80; font-weight: 600; }
+
+.duration-divider { border: none; border-top: 1px solid rgba(255,255,255,.06); margin-bottom: 16px; }
+
+.duration-saving {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600;
+  padding: 3px 10px; border-radius: 10px;
+  min-height: 24px;
+}
+.duration-saving.green { background: rgba(74,222,128,.1); color: #4ade80; }
+.duration-saving.none { color: transparent; }
+
+/* ─── FEATURES ─── */
+.features-box {
+  background: var(--surface); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px; padding: 32px; margin-bottom: 40px;
+}
+.features-box h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 1px; margin-bottom: 20px; color: var(--muted);
+}
+.features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+.feature-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: #ccc; padding: 9px 0;
+}
+.feature-item svg { width: 16px; height: 16px; stroke: #4ade80; fill: none; stroke-width: 2.5; flex-shrink: 0; }
+
+/* ─── CTA ─── */
+.cta-block { text-align: center; }
+.btn-subscribe {
+  background: var(--red); color: #fff;
+  padding: 16px 48px; border-radius: 8px;
+  font-size: 17px; font-weight: 600; cursor: pointer;
+  border: none; font-family: inherit;
+  transition: background .2s, transform .15s;
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.btn-subscribe:hover { background: var(--red-dark); transform: scale(1.03); }
+.btn-subscribe svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+.cta-note { font-size: 13px; color: var(--muted); }
+.cta-note strong { color: #fff; }
+
+/* ─── TRIAL STRIP ─── */
+.trial-strip {
+  background: linear-gradient(135deg, #1a0505 0%, #0f0f0f 50%, #0a0a12 100%);
+  border: 1px solid rgba(229,9,20,.2);
+  border-radius: 16px; padding: 40px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 32px; max-width: 860px; margin: 0 auto 80px;
+  position: relative; overflow: hidden;
+}
+.trial-strip::after {
+  content: '7'; position: absolute; right: 48px; top: 50%; transform: translateY(-50%);
+  font-family: 'Bebas Neue', sans-serif; font-size: 160px; line-height: 1;
+  color: rgba(229,9,20,.06); pointer-events: none; letter-spacing: -4px;
+}
+.trial-strip-text h2 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; margin-bottom: 8px; }
+.trial-strip-text h2 span { color: var(--red); }
+.trial-strip-text p { font-size: 14px; color: var(--muted); max-width: 420px; line-height: 1.6; }
+.btn-trial {
+  background: var(--red); color: #fff; padding: 14px 32px; border-radius: 8px;
+  font-size: 15px; font-weight: 600; cursor: pointer; border: none;
+  font-family: inherit; white-space: nowrap; flex-shrink: 0;
+  transition: background .2s, transform .15s;
+}
+.btn-trial:hover { background: var(--red-dark); transform: scale(1.03); }
+
+/* ─── FAQ ─── */
+.faq-section { padding: 0 48px 100px; max-width: 800px; margin: 0 auto; }
+.faq-section h2 { font-family: 'Bebas Neue', sans-serif; font-size: 40px; letter-spacing: 1px; text-align: center; margin-bottom: 40px; }
+.faq-item { border-bottom: 1px solid rgba(255,255,255,.07); }
+.faq-q {
+  width: 100%; background: none; border: none; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+  text-align: left; padding: 20px 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.faq-q svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 2; flex-shrink: 0; transition: transform .3s; }
+.faq-item.open .faq-q svg { transform: rotate(45deg); stroke: var(--red); }
+.faq-a { font-size: 14px; color: var(--muted); line-height: 1.7; max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .35s; }
+.faq-item.open .faq-a { max-height: 200px; padding-bottom: 20px; }
+
+/* ─── FOOTER ─── */
+.footer { text-align: center; padding: 40px 48px; border-top: 1px solid rgba(255,255,255,.06); }
+.footer p { font-size: 13px; color: rgba(255,255,255,.3); }
+.footer a { color: var(--red); text-decoration: none; }
+
+/* ─── RESPONSIVE ─── */
+@media(max-width: 700px) {
+  .nav { padding: 12px 20px; }
+  .hero { padding: 120px 20px 60px; }
+  .pricing-section { padding: 40px 20px 80px; }
+  .duration-grid { grid-template-columns: 1fr; gap:12px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .trial-strip { flex-direction: column; padding: 28px 20px; margin: 0 16px 60px; }
+  .trial-strip::after { display: none; }
+  .faq-section { padding: 0 20px 80px; }
+  .duration-amount { font-size: 40px; }
+  .hero h1 { font-size: clamp(40px, 10vw, 60px); }
+  .hero p { font-size: 15px; }
+  .footer { padding: 32px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="logo">Cinema Nest</a>
+  <a href="index.html" class="nav-back">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">
+    <span></span>
+    Limited Time Offer
+  </div>
+  <h1>Stream Everything.<br><span>Pay Nothing</span><br>For 7 Days.</h1>
+  <p>Unlimited movies, TV shows, and African originals. Watch anywhere, cancel anytime. No hidden charges.</p>
+  <div class="trial-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <strong>Free 7-day trial</strong> · No credit card risk · Cancel before trial ends and pay nothing
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing-section">
+
+  <div class="section-label">
+    <h2>Choose Your Plan Duration</h2>
+    <p>One plan. All content. The longer you commit, the more you save.</p>
+  </div>
+
+  <div class="duration-grid">
+
+    <!-- 1 MONTH -->
+    <div class="duration-card selected" id="card-1m" onclick="selectPlan('1m')">
+      <div class="check-ring"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="duration-header">
+        <div class="duration-name">1 Month</div>
+        <div class="duration-sub">Pay monthly, total flexibility</div>
+      </div>
+      <div class="duration-price-row">
+        <span class="duration-currency">$</span>
+        <span class="duration-amount">3</span>
+        <span class="duration-period">total</span>
+      </div>
+      <div class="duration-per-month">$3.00 <span>/mo</span></div>
+      <hr class="duration-divider">
+      <span class="duration-saving none">–</span>
+    </div>
+
+    <!-- 3 MONTHS -->
+    <div class="duration-card" id="card-3m" onclick="selectPlan('3m')">
+      <div class="check-ring"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="duration-header">
+        <div class="duration-name">3 Months</div>
+        <div class="duration-sub">Quarterly, better value</div>
+      </div>
+      <div class="duration-price-row">
+        <span class="duration-currency">$</span>
+        <span class="duration-amount">6</span>
+        <span class="duration-period">total</span>
+      </div>
+      <div class="duration-per-month">$2.00 <span>/mo</span></div>
+      <hr class="duration-divider">
+      <span class="duration-saving green">Save 33%</span>
+    </div>
+
+    <!-- 6 MONTHS -->
+    <div class="duration-card featured-duration" id="card-6m" onclick="selectPlan('6m')">
+      <span class="pop-badge">Most Popular</span>
+      <div class="check-ring"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="duration-header">
+        <div class="duration-name">6 Months</div>
+        <div class="duration-sub">Half a year of streaming</div>
+      </div>
+      <div class="duration-price-row">
+        <span class="duration-currency">$</span>
+        <span class="duration-amount">9</span>
+        <span class="duration-period">total</span>
+      </div>
+      <div class="duration-per-month">$1.50 <span>/mo</span></div>
+      <hr class="duration-divider">
+      <span class="duration-saving green">Save 50%</span>
+    </div>
+
+    <!-- 12 MONTHS -->
+    <div class="duration-card" id="card-12m" onclick="selectPlan('12m')">
+      <div class="check-ring"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="duration-header">
+        <div class="duration-name">12 Months</div>
+        <div class="duration-sub">Best long-term value</div>
+      </div>
+      <div class="duration-price-row">
+        <span class="duration-currency">$</span>
+        <span class="duration-amount">18</span>
+        <span class="duration-period">total</span>
+      </div>
+      <div class="duration-per-month">$1.50 <span>/mo</span></div>
+      <hr class="duration-divider">
+      <span class="duration-saving green">Save 50%</span>
+    </div>
+
+  </div>
+
+  <!-- WHAT'S INCLUDED -->
+  <div class="features-box">
+    <h3>Everything included in every plan</h3>
+    <div class="features-grid">
+      <div class="feature-item">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Unlimited movies & TV shows
+      </div>
+      <div class="feature-item">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        African Movies & Originals
+      </div>
+      <div class="feature-item">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        HD streaming quality
+      </div>
+      <div class="feature-item">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Watch on phone, tablet & laptop
+      </div>
+      <div class="feature-item">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        New movies added weekly
+      </div>
+      <div class="feature-item">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Cancel anytime, no penalties
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <button class="btn-subscribe" id="main-cta" onclick="goToCheckout()">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
+      <span id="cta-label">Subscribe – 1 Month</span>
+    </button>
+    <p class="cta-note">Secure checkout via Selar · Access activates instantly after payment · Cancel anytime</p>
+  </div>
+
+</div>
+
+<!-- TRIAL STRIP -->
+<div class="trial-strip">
+  <div class="trial-strip-text">
+    <h2>7 Days <span>On Us.</span></h2>
+    <p>Start today and get 7 days completely free. Stream everything — movies, shows, African originals. Cancel before your trial ends and you won't be charged.</p>
+  </div>
+  <button class="btn-trial" onclick="goToCheckout()">Start Free Trial →</button>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <h2>Questions? We've Got Answers.</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">
+      How does the free trial work?
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <div class="faq-a">When you sign up, you get 7 days of full access completely free. You'll enter your payment details upfront, but nothing is charged until your trial ends. Cancel any time before day 7 and you pay nothing.</div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">
+      What's the difference between the duration options?
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <div class="faq-a">Cinema Nest offers four plan lengths — 1, 3, 6, and 12 months — all with full access to every movie, show, and feature. Longer plans cost less per month: $3/mo for 1 month, $2/mo for 3 months, and $1.50/mo for 6 or 12 months.</div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">
+      What payment methods are accepted?
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <div class="faq-a">We accept Mobile money, Crrypto, Visa, Mastercard, and all major debit/credit cards — powered by Paystack, Africa's most trusted payment platform. All payments are fully encrypted and secure.</div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">
+      Can I get a refund if I'm not satisfied?
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <div class="faq-a">That's what the free trial is for! You get 7 full days to explore Cinema Nest risk-free. If you cancel during the trial, you owe nothing. After the trial, plans are non-refundable but you keep access for your full subscription period.</div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">
+      What happens when my plan expires?
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <div class="faq-a">You'll receive an email reminder before your plan ends. You can renew for the same or a different duration at any time. Your watchlist and preferences are saved so you can pick up right where you left off.</div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p style="margin-bottom:8px;">This site does not store any files on our server. We only link to media which is hosted on third-party services.</p>
+  <p>© 2025 Cinema Nest. All rights reserved. · <a href="#">Terms of Use</a> · <a href="#">Privacy Policy</a> · <a href="mailto:contact@cinemanest">contact@cinemanest</a></p>
+</div>
+
+<script>
+// ── SELAR PRODUCT LINK ──
+const SELAR_LINKS = {
+  '1m':  'https://selar.com/1c7tz476t8',
+  '3m':  'https://selar.com/851861q275',
+  '6m':  'https://selar.com/6487z415ih',
+  '12m': 'https://selar.com/5rc8s61861',
+};
+
+const PLAN_LABELS = {
+  '1m':  'Subscribe – 1 Month',
+  '3m':  'Subscribe – 3 Months',
+  '6m':  'Subscribe – 6 Months',
+  '12m': 'Subscribe – 12 Months',
+};
+
+let selectedPlan = '1m';
+
+function selectPlan(plan) {
+  // Remove selected from all
+  document.querySelectorAll('.duration-card').forEach(c => c.classList.remove('selected'));
+  // Add to clicked
+  document.getElementById('card-' + plan).classList.add('selected');
+  selectedPlan = plan;
+  // Update CTA label
+  document.getElementById('cta-label').textContent = PLAN_LABELS[plan];
+}
+
+function goToCheckout() {
+  // Remember which plan was chosen so activate.html can read it back
+  // if Selar's own redirect doesn't carry a plan param (it's a fallback only —
+  // the redirect URL configured on each Selar product is the source of truth).
+  try { localStorage.setItem('cinemanest-pending-plan', selectedPlan); } catch {}
+  window.location.href = SELAR_LINKS[selectedPlan] || SELAR_LINKS['1m'];
+}
+
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+</script>
+</body>
+</html>

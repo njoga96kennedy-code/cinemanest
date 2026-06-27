@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watch – Cinema Nest</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #e50914;
+  --red-dark: #b0060f;
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1e1e1e;
+  --text: #fff;
+  --muted: #aaa;
+  --radius: 6px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080808; color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+/* ── NAV ── */
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 40px;
+  background: rgba(8,8,8,.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--red); letter-spacing: 2px; text-decoration: none; }
+.nav-back {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--muted); font-size: 13px; text-decoration: none;
+  transition: color .2s;
+}
+.nav-back:hover { color: #fff; }
+.nav-back svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+
+/* ── PLAYER SECTION ── */
+.player-wrap {
+  background: #000;
+  position: relative;
+}
+.player-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+.player-frame-wrap {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 */
+  background: #000;
+}
+.player-frame-wrap iframe {
+  position: absolute;
+  inset: 0; width: 100%; height: 100%;
+  border: none;
+}
+.player-loading {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #000; gap: 16px; z-index: 10;
+}
+.player-loading .spinner {
+  width: 44px; height: 44px;
+  border: 3px solid rgba(255,255,255,.1);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+.player-loading p { font-size: 13px; color: var(--muted); }
+
+/* ── TV SEASON SELECTOR ── */
+#season-bar {
+  background: var(--surface);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  display: none;
+}
+.season-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 10px 24px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.season-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.season-select, .episode-select {
+  background: var(--surface2); border: 1px solid rgba(255,255,255,.12);
+  color: #fff; font-family: inherit; font-size: 13px;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer; outline: none;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%23aaa' stroke-width='2'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+  padding-right: 28px;
+}
+
+/* ── CONTENT BELOW PLAYER ── */
+.content-wrap {
+  max-width: 1200px; margin: 0 auto;
+  padding: 28px 24px 48px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 48px;
+}
+@media (max-width: 860px) {
+  .content-wrap { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* ── MAIN INFO ── */
+.movie-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 4vw, 48px);
+  letter-spacing: 1px; line-height: 1; margin-bottom: 12px;
+}
+.movie-meta {
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap; margin-bottom: 20px; font-size: 13px; color: var(--muted);
+}
+.meta-badge {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  padding: 3px 10px; border-radius: 4px; font-size: 12px; color: #ddd;
+}
+.meta-badge.rating-badge { color: #fbbf24; border-color: rgba(251,191,36,.3); background: rgba(251,191,36,.08); }
+.movie-overview {
+  font-size: 14px; color: #ccc; line-height: 1.75;
+  margin-bottom: 24px; max-width: 680px;
+}
+.movie-overview.clamped {
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.read-more { color: var(--red); font-size: 13px; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; margin-bottom: 24px; display: block; }
+
+.cast-section { margin-bottom: 24px; }
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.cast-list { display: flex; gap: 10px; flex-wrap: wrap; }
+.cast-pill {
+  background: var(--surface2); border: 1px solid rgba(255,255,255,.08);
+  font-size: 12px; color: #ddd; padding: 5px 12px; border-radius: 20px;
+}
+
+.genres-list { display: flex; gap: 8px; flex-wrap: wrap; }
+.genre-tag {
+  background: rgba(229,9,20,.1); border: 1px solid rgba(229,9,20,.25);
+  color: var(--red); font-size: 12px; padding: 4px 12px; border-radius: 20px;
+  font-weight: 600;
+}
+
+/* ── SIDEBAR: RELATED ── */
+.sidebar-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; margin-bottom: 16px; }
+.related-list { display: flex; flex-direction: column; gap: 12px; }
+.related-card {
+  display: flex; gap: 12px; cursor: pointer;
+  padding: 10px; border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,.05);
+  transition: background .2s, border-color .2s;
+  text-decoration: none; color: inherit;
+}
+.related-card:hover { background: var(--surface2); border-color: rgba(255,255,255,.12); }
+.related-thumb {
+  width: 88px; height: 56px; object-fit: cover;
+  border-radius: 6px; flex-shrink: 0; background: #222;
+}
+.related-info { flex: 1; min-width: 0; }
+.related-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.related-meta { font-size: 11px; color: var(--muted); }
+.related-play {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(229,9,20,.15); border: 1px solid rgba(229,9,20,.3);
+  flex-shrink: 0; align-self: center; transition: background .2s;
+}
+.related-card:hover .related-play { background: var(--red); border-color: var(--red); }
+.related-play svg { width: 10px; height: 10px; fill: var(--red); }
+.related-card:hover .related-play svg { fill: #fff; }
+
+/* ── PAYWALL OVERLAY ── */
+#paywall {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.88); z-index: 500;
+  backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+}
+#auth-loading {
+  position: fixed; inset: 0; background: #080808;
+  z-index: 9999; display: flex; align-items: center; justify-content: center;
+}
+#auth-loading .spinner {
+  width: 44px; height: 44px;
+  border: 3px solid rgba(255,255,255,.1);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+.paywall-box {
+  background: var(--surface); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; padding: 48px 40px; max-width: 420px; width: 90%;
+  text-align: center;
+}
+.paywall-icon {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: rgba(229,9,20,.12); border: 1px solid rgba(229,9,20,.25);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;
+}
+.paywall-box h2 { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 1px; margin-bottom: 10px; }
+.paywall-box p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+.paywall-btn {
+  display: block; width: 100%; background: var(--red); color: #fff; border: none;
+  border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+  padding: 14px; cursor: pointer; text-decoration: none; transition: background .2s; margin-bottom: 10px;
+}
+.paywall-btn:hover { background: var(--red-dark); }
+.paywall-btn.secondary {
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #ddd;
+}
+.paywall-btn.secondary:hover { background: rgba(255,255,255,.12); }
+
+/* ── SKELETON ── */
+.skeleton { background: linear-gradient(90deg, #1e1e1e 25%, #2a2a2a 50%, #1e1e1e 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 4px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+@keyframes pill-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+.fade-in { animation: fadeIn .4s ease both; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding: 20px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+}
+footer p { font-size: 11px; color: rgba(255,255,255,.25); line-height: 1.6; max-width: 580px; }
+footer a { font-size: 11px; color: rgba(255,255,255,.3); text-decoration: none; transition: color .2s; }
+footer a:hover { color: var(--red); }
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  .nav { padding: 12px 14px; }
+  .content-wrap { padding: 16px 14px 32px; }
+  .season-inner { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+  footer { padding: 14px 16px; }
+  .movie-title { font-size: clamp(24px, 6vw, 40px); }
+  .cast-pill { font-size: 11px; padding: 4px 10px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="logo" style="display:flex;align-items:center;">
+    <svg width="150" height="38" viewBox="0 0 170 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+      <circle cx="22" cy="22" r="14" stroke="#e50914" stroke-width="2"/>
+      <circle cx="22" cy="22" r="5" fill="#e50914"/>
+      <circle cx="22" cy="10" r="2.5" fill="#e50914"/>
+      <circle cx="22" cy="34" r="2.5" fill="#e50914"/>
+      <circle cx="10" cy="22" r="2.5" fill="#e50914"/>
+      <circle cx="34" cy="22" r="2.5" fill="#e50914"/>
+      <line x1="13.5" y1="13.5" x2="17.5" y2="17.5" stroke="#e50914" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="30.5" y1="13.5" x2="26.5" y2="17.5" stroke="#e50914" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="13.5" y1="30.5" x2="17.5" y2="26.5" stroke="#e50914" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="30.5" y1="30.5" x2="26.5" y2="26.5" stroke="#e50914" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M10 35 Q22 28 34 35" stroke="#e50914" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M7 40 Q22 31 37 40" stroke="#e50914" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+      <text x="46" y="28" font-family="'Bebas Neue', Georgia, serif" font-size="26" letter-spacing="2" fill="#ffffff">CINEMA</text>
+      <text x="120" y="28" font-family="'Bebas Neue', Georgia, serif" font-size="26" letter-spacing="2" fill="#e50914">NEST</text>
+    </svg>
+  </a>
+  <div class="nav-right">
+    <div id="watch-status-pill" style="display:none;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;"></div>
+    <a href="index.html" class="nav-back">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Browse
+    </a>
+  </div>
+</nav>
+
+<div class="player-wrap">
+  <div class="player-container">
+    <div class="player-frame-wrap" id="player-frame-wrap">
+      <div class="player-loading" id="player-loading">
+        <div class="spinner"></div>
+        <p id="player-loading-msg">Connecting…</p>
+      </div>
+      <iframe id="player-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen" style="opacity:0;transition:opacity .4s;"></iframe>
+    </div>
+  </div>
+</div>
+
+<div id="season-bar">
+  <div class="season-inner">
+    <span class="season-label">Season</span>
+    <select class="season-select" id="season-select" onchange="loadEpisodes()"></select>
+    <span class="season-label" style="margin-left:8px;">Episode</span>
+    <select class="episode-select" id="episode-select" onchange="loadEpisode()"></select>
+  </div>
+</div>
+
+<div class="content-wrap fade-in" id="content-wrap">
+  <div id="main-info">
+    <div class="skeleton" style="height:44px;width:60%;margin-bottom:14px;"></div>
+    <div class="skeleton" style="height:18px;width:40%;margin-bottom:20px;"></div>
+    <div class="skeleton" style="height:14px;width:100%;margin-bottom:8px;"></div>
+    <div class="skeleton" style="height:14px;width:90%;margin-bottom:8px;"></div>
+    <div class="skeleton" style="height:14px;width:75%;margin-bottom:24px;"></div>
+    <div style="display:flex;gap:8px;">
+      <div class="skeleton" style="height:28px;width:80px;border-radius:20px;"></div>
+      <div class="skeleton" style="height:28px;width:80px;border-radius:20px;"></div>
+      <div class="skeleton" style="height:28px;width:80px;border-radius:20px;"></div>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="sidebar-title">More Like This</div>
+    <div class="related-list" id="related-list">
+      ${[1,2,3,4].map(() => `
+        <div style="display:flex;gap:12px;padding:10px;background:var(--surface);border-radius:8px;">
+          <div class="skeleton" style="width:88px;height:56px;border-radius:4px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div class="skeleton" style="height:13px;width:80%;margin-bottom:6px;"></div>
+            <div class="skeleton" style="height:11px;width:50%;"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+</div>
+
+<div id="auth-loading">
+  <div class="spinner"></div>
+</div>
+
+<div id="paywall">
+  <div class="paywall-box">
+    <div class="paywall-icon">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#e50914" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h2>Members Only</h2>
+    <p>Subscribe to watch unlimited movies and TV shows, or start your 7-day free trial.</p>
+    <a href="pricing.html" class="paywall-btn">Pay Now – Subscribe</a>
+    <a href="signup.html" class="paywall-btn secondary">Start Free Trial</a>
+    <a href="signup.html" class="paywall-btn secondary" onclick="localStorage.setItem('intent','signin');return true;">Already a member? Sign In</a>
+  </div>
+</div>
+
+<footer>
+  <p>This site does not store any files on our server. We only link to media which is hosted on third-party services.</p>
+  <a href="mailto:contact@cinemanest">contact@cinemanest</a>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyARv0yl2troYUULCo-7avpF4yg5nZ-xoEE",
+    authDomain: "cinema-nest-2bf23.firebaseapp.com",
+    projectId: "cinema-nest-2bf23",
+    storageBucket: "cinema-nest-2bf23.firebasestorage.app",
+    messagingSenderId: "912475832817",
+    appId: "1:912475832817:web:7d0de62cac82a04c4e8450"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  setPersistence(auth, browserLocalPersistence).catch(() => {});
+
+  const API_KEY = '1d3ae144acfb6bfcb25f70361cedcf29';
+  const API     = 'https://api.themoviedb.org/3';
+  const IMG_W   = 'https://image.tmdb.org/t/p/w500';
+
+  const params = new URLSearchParams(window.location.search);
+  const mediaId   = params.get('id');
+  const mediaType = params.get('type') || 'movie';
+
+  let currentSeason  = 1;
+  let currentEpisode = 1;
+  let mediaData      = null;
+
+  function buildSrc() {
+    return mediaType === 'tv'
+      ? `https://vidsrc.to/embed/tv/${mediaId}/${currentSeason}/${currentEpisode}`
+      : `https://vidsrc.to/embed/movie/${mediaId}`;
+  }
+
+  async function loadPlayer() {
+    const iframe  = document.getElementById('player-iframe');
+    const loading = document.getElementById('player-loading');
+    const msgEl   = document.getElementById('player-loading-msg');
+
+    loading.style.display = 'flex';
+    iframe.style.opacity = '0';
+    clearInterval(window._msgCycle);
+    clearTimeout(window._playerLoadTimeout);
+
+    if (msgEl) msgEl.textContent = 'Connecting…';
+
+    const src = buildSrc();
+    iframe.src = src;
+
+    iframe.onload = () => {
+      clearInterval(window._msgCycle);
+      clearTimeout(window._playerLoadTimeout);
+      loading.style.display = 'none';
+      iframe.style.opacity = '1';
+    };
+
+    window._playerLoadTimeout = setTimeout(() => {
+      clearInterval(window._msgCycle);
+      loading.style.display = 'none';
+      iframe.style.opacity = '1';
+    }, 8000);
+  }
+
+  async function loadTVSeasons(totalSeasons) {
+    const seasonBar    = document.getElementById('season-bar');
+    const seasonSelect = document.getElementById('season-select');
+    seasonBar.style.display = 'block';
+
+    seasonSelect.innerHTML = '';
+    for (let s = 1; s <= totalSeasons; s++) {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = `Season ${s}`;
+      seasonSelect.appendChild(opt);
+    }
+
+    await loadEpisodes();
+  }
+
+  window.loadEpisodes = async () => {
+    currentSeason = parseInt(document.getElementById('season-select').value);
+    const episodeSelect = document.getElementById('episode-select');
+    episodeSelect.innerHTML = '<option>Loading…</option>';
+
+    try {
+      const res  = await fetch(`${API}/tv/${mediaId}/season/${currentSeason}?api_key=${API_KEY}`);
+      const data = await res.json();
+      const eps  = data.episodes || [];
+      episodeSelect.innerHTML = '';
+      eps.forEach(ep => {
+        const opt = document.createElement('option');
+        opt.value = ep.episode_number;
+        opt.textContent = `Ep ${ep.episode_number}${ep.name ? ' – ' + ep.name : ''}`;
+        episodeSelect.appendChild(opt);
+      });
+      currentEpisode = 1;
+      episodeSelect.value = 1;
+      loadPlayer();
+    } catch {
+      episodeSelect.innerHTML = '<option value="1">Episode 1</option>';
+      loadPlayer();
+    }
+  };
+
+  window.loadEpisode = () => {
+    currentEpisode = parseInt(document.getElementById('episode-select').value);
+    loadPlayer();
+  };
+
+  async function saveWatchHistory(user) {
+    if (!mediaData) return;
+    try {
+      const ref = doc(db, 'users', user.uid, 'watchHistory', String(mediaId));
+      await setDoc(ref, {
+        mediaId, mediaType,
+        title: mediaData.title || mediaData.name || '',
+        poster: mediaData.poster_path || '',
+        backdrop: mediaData.backdrop_path || '',
+        watchedAt: serverTimestamp(),
+      }, { merge: true });
+    } catch (e) {}
+  }
+
+  async function loadMetadata() {
+    if (mediaType !== 'tv') {
+      loadPlayer();
+    }
+
+    try {
+      const res  = await fetch(`${API}/${mediaType}/${mediaId}?api_key=${API_KEY}&append_to_response=credits,similar`);
+      mediaData  = await res.json();
+
+      const title   = mediaData.title || mediaData.name || '';
+      const year    = (mediaData.release_date || mediaData.first_air_date || '').slice(0, 4);
+      const rating  = mediaData.vote_average ? mediaData.vote_average.toFixed(1) : null;
+      const runtime = mediaData.runtime
+        ? `${Math.floor(mediaData.runtime / 60)}h ${mediaData.runtime % 60}m`
+        : mediaData.number_of_seasons
+        ? `${mediaData.number_of_seasons} Season${mediaData.number_of_seasons > 1 ? 's' : ''}`
+        : '';
+      const genres  = (mediaData.genres || []).slice(0, 4).map(g => g.name);
+      const cast    = (mediaData.credits?.cast || []).slice(0, 8).map(c => c.name);
+      const overview = mediaData.overview || '';
+      const similar  = (mediaData.similar?.results || []).filter(x => x.poster_path || x.backdrop_path).slice(0, 6);
+
+      document.title = `${title} – Cinema Nest`;
+
+      const mainEl = document.getElementById('main-info');
+      mainEl.innerHTML = `
+        <h1 class="movie-title">${title}</h1>
+        <div class="movie-meta">
+          ${rating ? `<span class="meta-badge rating-badge">★ ${rating}</span>` : ''}
+          ${year ? `<span class="meta-badge">${year}</span>` : ''}
+          ${runtime ? `<span class="meta-badge">${runtime}</span>` : ''}
+          <span class="meta-badge">${mediaType === 'tv' ? 'TV Series' : 'Movie'}</span>
+        </div>
+        <p class="movie-overview clamped" id="overview-text">${overview}</p>
+        ${overview.length > 200 ? `<button class="read-more" id="read-more-btn" onclick="toggleOverview()">Read more</button>` : ''}
+        ${genres.length ? `
+          <div class="cast-section">
+            <div class="section-label">Genres</div>
+            <div class="genres-list">${genres.map(g => `<span class="genre-tag">${g}</span>`).join('')}</div>
+          </div>` : ''}
+        ${cast.length ? `
+          <div class="cast-section" style="margin-top:20px;">
+            <div class="section-label">Cast</div>
+            <div class="cast-list">${cast.map(c => `<span class="cast-pill">${c}</span>`).join('')}</div>
+          </div>` : ''}
+      `;
+
+      if (mediaType === 'tv' && mediaData.number_of_seasons) {
+        await loadTVSeasons(mediaData.number_of_seasons);
+      }
+
+      const relatedEl = document.getElementById('related-list');
+      if (similar.length) {
+        relatedEl.innerHTML = similar.map(item => {
+          const img  = item.backdrop_path ? IMG_W + item.backdrop_path : (item.poster_path ? IMG_W + item.poster_path : '');
+          const t    = item.title || item.name || '';
+          const yr   = (item.release_date || item.first_air_date || '').slice(0, 4);
+          const rat  = item.vote_average ? '★ ' + item.vote_average.toFixed(1) : '';
+          return `
+            <a class="related-card" href="watch.html?id=${item.id}&type=${mediaType}">
+              <img class="related-thumb" src="${img}" alt="${t}" onerror="this.style.display='none'">
+              <div class="related-info">
+                <div class="related-title">${t}</div>
+                <div class="related-meta">${[yr, rat].filter(Boolean).join(' · ')}</div>
+              </div>
+              <div class="related-play">
+                <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </div>
+            </a>`;
+        }).join('');
+      } else {
+        relatedEl.innerHTML = '<p style="font-size:13px;color:var(--muted);">No suggestions found.</p>';
+      }
+
+    } catch (err) {
+      document.getElementById('main-info').innerHTML = '<p style="color:var(--muted)">Could not load content details.</p>';
+      loadPlayer();
+    }
+  }
+
+  window.toggleOverview = () => {
+    const el  = document.getElementById('overview-text');
+    const btn = document.getElementById('read-more-btn');
+    if (el.classList.contains('clamped')) {
+      el.classList.remove('clamped');
+      btn.textContent = 'Show less';
+    } else {
+      el.classList.add('clamped');
+      btn.textContent = 'Read more';
+    }
+  };
+
+  (function() {
+    const up = new URLSearchParams(window.location.search);
+    if (up.get('paid') === '1') {
+      const PLAN_DAYS = { '1m': 30, '3m': 90, '6m': 180, '12m': 365 };
+      const plan = PLAN_DAYS[up.get('plan')] ? up.get('plan') : '1m';
+      localStorage.setItem('cinemanest-paid', 'true');
+      const subEnd = new Date(Date.now() + PLAN_DAYS[plan] * 24 * 60 * 60 * 1000);
+      localStorage.setItem('cinemanest-sub', JSON.stringify({ end: subEnd.toISOString() }));
+      up.delete('paid');
+      up.delete('plan');
+      const newSearch = up.toString();
+      history.replaceState({}, '', window.location.pathname + (newSearch ? '?' + newSearch : ''));
+    }
+  })();
+
+  function renderStatusPill() {
+    const pill = document.getElementById('watch-status-pill');
+    if (!pill) return;
+
+    const saved = localStorage.getItem('cinemanest-trial');
+    if (saved) {
+      try {
+        const trial  = JSON.parse(saved);
+        const msLeft = new Date(trial.end) - new Date();
+        if (msLeft > 0) {
+          const d = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+          pill.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;background:rgba(229,9,20,.10);border:1px solid rgba(229,9,20,.25);color:#e50914;';
+          pill.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#e50914;animation:pill-pulse 2s infinite;flex-shrink:0;"></span> Trial · ${d} day${d !== 1 ? 's' : ''} left`;
+          return;
+        }
+      } catch {}
+    }
+
+    if (localStorage.getItem('cinemanest-paid') === 'true') {
+      let label = 'Subscribed';
+      const subSaved = localStorage.getItem('cinemanest-sub');
+      if (subSaved) {
+        try {
+          const sub    = JSON.parse(subSaved);
+          const msLeft = new Date(sub.end) - new Date();
+          if (msLeft > 0) {
+            const d = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+            label = `Subscribed · ${d} day${d !== 1 ? 's' : ''} left`;
+          }
+        } catch {}
+      }
+      pill.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#4ade80;';
+      pill.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0;"></span> ${label}`;
+    }
+  }
+  renderStatusPill();
+
+  const authTimeout = setTimeout(() => {
+    const loading = document.getElementById('auth-loading');
+    if (loading && loading.style.display !== 'none') {
+      loading.style.display = 'none';
+      if (localStorage.getItem('cinemanest-paid') === 'true') {
+        if (mediaId) loadMetadata();
+        return;
+      }
+      const saved = localStorage.getItem('cinemanest-trial');
+      if (saved) {
+        try {
+          if (new Date(JSON.parse(saved).end) > new Date()) {
+            if (mediaId) loadMetadata();
+            return;
+          }
+        } catch {}
+      }
+      document.getElementById('paywall').style.display = 'flex';
+    }
+  }, 3000);
+
+  onAuthStateChanged(auth, async (user) => {
+    clearTimeout(authTimeout);
+    const authLoading = document.getElementById('auth-loading');
+    if (authLoading) authLoading.style.display = 'none';
+
+    if (localStorage.getItem('cinemanest-paid') === 'true') {
+      if (mediaId) {
+        await loadMetadata();
+        if (user) setTimeout(() => saveWatchHistory(user), 5000);
+      }
+      return;
+    }
+
+    if (!user) {
+      document.getElementById('paywall').style.display = 'flex';
+      if (mediaId) loadMetadata();
+      return;
+    }
+
+    if (mediaId) {
+      await loadMetadata();
+      setTimeout(() => saveWatchHistory(user), 5000);
+    }
+
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const data = snap.data();
+
+        if (data.plan === 'active' && data.subscriptionEnd) {
+          const expired = new Date(data.subscriptionEnd) <= new Date();
+          if (expired) {
+            showExpiredPaywall('Subscription Expired', 'Your subscription has ended. Renew now to keep watching.');
+          } else {
+            localStorage.setItem('cinemanest-paid', 'true');
+            return;
+          }
+        }
+        else if (data.trialEnd) {
+          const expired = new Date(data.trialEnd) <= new Date();
+          if (expired) {
+            showExpiredPaywall('Trial Expired', 'Your free trial has ended. Subscribe now to keep watching unlimited movies and shows.');
+          }
+        }
+        else {
+          showExpiredPaywall('Subscription Required', 'Subscribe to Cinema Nest to watch movies and shows.');
+        }
+      }
+    } catch {
+      const saved = localStorage.getItem('cinemanest-trial');
+      if (saved) {
+        try {
+          if (new Date(JSON.parse(saved).end) <= new Date()) {
+            showExpiredPaywall('Trial Expired', 'Your free trial has ended. Subscribe now to keep watching.');
+          }
+        } catch {}
+      }
+    }
+  });
+
+  function showExpiredPaywall(title, message) {
+    const pw = document.getElementById('paywall');
+    pw.querySelector('h2').textContent = title || 'Subscription Required';
+    pw.querySelector('p').textContent = message || 'Subscribe to keep watching.';
+    const box = pw.querySelector('.paywall-box');
+    box.querySelectorAll('.paywall-btn').forEach(b => b.remove());
+    const payBtn = document.createElement('a');
+    payBtn.href = 'pricing.html';
+    payBtn.className = 'paywall-btn';
+    payBtn.textContent = 'Subscribe Now – From $3/mo';
+    box.appendChild(payBtn);
+    const homeBtn = document.createElement('a');
+    homeBtn.href = 'index.html';
+    homeBtn.className = 'paywall-btn secondary';
+    homeBtn.textContent = '← Back to Home';
+    box.appendChild(homeBtn);
+    pw.style.display = 'flex';
+  }
+</script>
+</body>
+</html>

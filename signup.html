@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cinema Nest – Start Your Free Trial</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #e50914;
+  --red-dark: #b0060f;
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1e1e1e;
+  --text: #fff;
+  --muted: #aaa;
+  --radius: 6px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080808; color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ─── NAV ─── */
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 48px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 30px; color: var(--red); letter-spacing: 2px; text-decoration: none; }
+.nav-login { color: var(--muted); font-size: 13px; text-decoration: none; transition: color .2s; }
+.nav-login:hover { color: var(--text); }
+
+/* ─── LAYOUT ─── */
+.page-wrap {
+  flex: 1; display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 65px);
+}
+
+/* ─── LEFT PANEL ─── */
+.left-panel {
+  background: linear-gradient(160deg, #1a0505 0%, #0d0d0d 60%);
+  padding: 64px 56px;
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; overflow: hidden;
+  border-right: 1px solid rgba(255,255,255,.05);
+}
+.left-panel::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 70% at 20% 50%, rgba(229,9,20,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.left-bg-text {
+  position: absolute; bottom: -20px; right: -10px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 220px; line-height: 1;
+  color: rgba(229,9,20,.04); pointer-events: none; letter-spacing: -4px;
+  user-select: none;
+}
+
+.trial-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(229,9,20,.15); border: 1px solid rgba(229,9,20,.3);
+  color: var(--red); font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 20px; margin-bottom: 28px;
+  width: fit-content;
+}
+.trial-pill span { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.left-panel h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 5vw, 68px);
+  line-height: .92; letter-spacing: 1px; margin-bottom: 20px;
+}
+.left-panel h1 em { color: var(--red); font-style: normal; }
+.left-panel > p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 40px; max-width: 360px; }
+
+.perks { display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; }
+.perk { display: flex; align-items: flex-start; gap: 12px; }
+.perk-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(229,9,20,.12); border: 1px solid rgba(229,9,20,.2);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.perk-icon svg { width: 15px; height: 15px; stroke: var(--red); fill: none; stroke-width: 2; }
+.perk-text strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 1px; }
+.perk-text span { font-size: 12px; color: var(--muted); }
+
+.no-card-note {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: rgba(255,255,255,.35);
+  border-top: 1px solid rgba(255,255,255,.06); padding-top: 24px;
+}
+.no-card-note svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+
+/* ─── RIGHT PANEL ─── */
+.right-panel {
+  padding: 64px 56px;
+  display: flex; flex-direction: column; justify-content: center;
+  background: #080808;
+}
+
+/* ─── STEPS ─── */
+.steps {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 40px;
+}
+.step {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; letter-spacing: .5px;
+  text-transform: uppercase; color: rgba(255,255,255,.25);
+}
+.step.active { color: var(--text); }
+.step.done { color: var(--red); }
+.step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+  transition: all .3s;
+}
+.step.active .step-num { border-color: var(--text); background: var(--text); color: #000; }
+.step.done .step-num { border-color: var(--red); background: var(--red); color: #fff; }
+.step-line { flex: 1; height: 1px; background: rgba(255,255,255,.1); margin: 0 12px; }
+
+/* ─── FORM ─── */
+.form-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; margin-bottom: 6px; }
+.form-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.form-group input {
+  width: 100%; background: var(--surface);
+  border: 1.5px solid rgba(255,255,255,.08);
+  padding: 13px 16px; border-radius: 8px;
+  color: var(--text); font-size: 14px; font-family: inherit;
+  outline: none; transition: border-color .2s, background .2s;
+}
+.form-group input:focus { border-color: var(--red); background: #1a1a1a; }
+.form-group input::placeholder { color: rgba(255,255,255,.25); }
+.form-group input.error { border-color: #ff4444; }
+.field-error { font-size: 11px; color: #ff6b6b; margin-top: 5px; display: none; }
+.field-error.show { display: block; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.password-wrap { position: relative; }
+.password-wrap input { padding-right: 44px; }
+.pw-toggle {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  display: flex; align-items: center; transition: color .2s;
+}
+.pw-toggle:hover { color: var(--text); }
+.pw-toggle svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.terms-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 24px; margin-top: 4px;
+}
+.terms-row input[type="checkbox"] { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--red); flex-shrink: 0; cursor: pointer; }
+.terms-row label { font-size: 12px; color: var(--muted); line-height: 1.5; cursor: pointer; }
+.terms-row a { color: var(--red); text-decoration: none; }
+
+.btn-start {
+  width: 100%; background: var(--red); color: #fff;
+  border: none; padding: 15px; border-radius: 8px;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  font-family: inherit; letter-spacing: .3px;
+  transition: background .2s, transform .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-start:hover { background: var(--red-dark); transform: scale(1.01); }
+.btn-start:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-start svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+.already { text-align: center; margin-top: 20px; font-size: 13px; color: var(--muted); }
+.already a { color: var(--red); text-decoration: none; font-weight: 600; }
+
+/* ─── SUCCESS SCREEN ─── */
+.success-screen {
+  display: none; text-align: center;
+  animation: fadeIn .5s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(74,222,128,.12); border: 2px solid rgba(74,222,128,.3);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.success-icon svg { width: 32px; height: 32px; stroke: #4ade80; fill: none; stroke-width: 2.5; }
+.success-screen h2 { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 1px; margin-bottom: 8px; }
+.success-screen h2 span { color: var(--red); }
+.success-screen p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; max-width: 360px; margin-left: auto; margin-right: auto; }
+
+/* Trial countdown box */
+.trial-countdown {
+  background: var(--surface); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px; padding: 20px 24px; margin-bottom: 28px;
+  text-align: left;
+}
+.trial-countdown .tc-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.trial-days { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.trial-days-num { font-family: 'Bebas Neue', sans-serif; font-size: 48px; line-height: 1; color: var(--red); }
+.trial-days-text { font-size: 13px; color: #ccc; line-height: 1.4; }
+.trial-bar-wrap { height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
+.trial-bar { height: 100%; background: var(--red); border-radius: 2px; width: 100%; transition: width 1s; }
+
+.btn-watch-now {
+  width: 100%; background: var(--red); color: #fff;
+  border: none; padding: 15px; border-radius: 8px;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: background .2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  text-decoration: none;
+}
+.btn-watch-now:hover { background: var(--red-dark); }
+.btn-watch-now svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* ─── RESPONSIVE ─── */
+@media(max-width: 800px) {
+  .nav { padding: 16px 20px; }
+  .page-wrap { grid-template-columns: 1fr; }
+  .left-panel { display: none; }
+  .right-panel { padding: 40px 24px; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="logo">Cinema Nest</a>
+  <a href="#" class="nav-login" onclick="openSignIn();return false;">Already a member? Sign in</a>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- LEFT: Perks -->
+  <div class="left-panel">
+    <div class="left-bg-text">7</div>
+    <div class="trial-pill"><span></span> Free Trial</div>
+    <h1>7 Days Free.<br><em>Everything</em><br>Included.</h1>
+    <p>Create your account and start watching instantly. No payment needed to begin your trial.</p>
+
+    <div class="perks">
+      <div class="perk">
+        <div class="perk-icon">
+          <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        </div>
+        <div class="perk-text">
+          <strong>Unlimited Streaming</strong>
+          <span>Movies, TV shows & African originals — all in HD</span>
+        </div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">
+          <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <div class="perk-text">
+          <strong>Watch on Any Device</strong>
+          <span>Phone, tablet, laptop — pick up where you left off</span>
+        </div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="perk-text">
+          <strong>African movies & Originals</strong>
+          <span>Local stories, international quality</span>
+        </div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </div>
+        <div class="perk-text">
+          <strong>Cancel Anytime</strong>
+          <span>No commitment, no hidden fees, no stress</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="no-card-note">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      No credit card required to start your free trial
+    </div>
+  </div>
+
+  <!-- RIGHT: Form -->
+  <div class="right-panel">
+
+    <!-- Steps -->
+    <div class="steps">
+      <div class="step active" id="step1">
+        <div class="step-num" id="step1-num">1</div>
+        Create Account
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step2">
+        <div class="step-num" id="step2-num">2</div>
+        Start Trial
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step3">
+        <div class="step-num" id="step3-num">3</div>
+        Watch Now
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div id="signup-form">
+      <div class="form-title">Create Your Account</div>
+      <div class="form-sub">Fill in your details to start your 7-day free trial</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="fname" placeholder="John">
+          <div class="field-error" id="fname-err">Please enter your first name</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="you@example.com">
+        <div class="field-error" id="email-err">Please enter a valid email address</div>
+      </div>
+
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="phone" placeholder="0712 345 678">
+        <div class="field-error" id="phone-err">Please enter a valid phone number</div>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input type="password" id="password" placeholder="Min. 8 characters">
+          <button class="pw-toggle" onclick="togglePw()" type="button" tabindex="-1">
+            <svg id="pw-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="field-error" id="pw-err">Password must be at least 8 characters</div>
+      </div>
+
+      <div class="terms-row">
+        <input type="checkbox" id="terms">
+        <label for="terms">I agree to Cinema Nest's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I understand my free trial lasts 7 days.</label>
+      </div>
+
+      <div id="firebase-error" style="display:none; background:rgba(255,68,68,.12); border:1px solid rgba(255,68,68,.35); color:#ff6b6b; font-size:13px; padding:12px 16px; border-radius:6px; margin-bottom:16px; line-height:1.5;"></div>
+
+      <button class="btn-start" id="submit-btn" onclick="handleSignup()">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+        Start My 7-Day Free Trial
+      </button>
+
+      <div class="already">Already have an account? <a href="#" onclick="openSignIn();return false;">Sign in</a></div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Welcome to<br><span>Cinema Nest!</span></h2>
+      <p id="success-msg">Your 7-day free trial has started. Enjoy unlimited streaming — no payment needed until your trial ends.</p>
+
+      <div class="trial-countdown">
+        <div class="tc-label">Your Free Trial</div>
+        <div class="trial-days">
+          <div class="trial-days-num">7</div>
+          <div class="trial-days-text">days remaining<br><span style="color:var(--muted);font-size:11px;" id="trial-end-date"></span></div>
+        </div>
+        <div class="trial-bar-wrap"><div class="trial-bar" id="trial-bar"></div></div>
+      </div>
+
+      <a href="index.html" class="btn-watch-now">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Start Watching Now
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── SIGN IN MODAL ── -->
+<div id="signin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:#141414;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:40px 36px;width:100%;max-width:400px;position:relative;animation:fadeIn .2s ease;">
+    <button onclick="closeSignIn()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#aaa;cursor:pointer;font-size:20px;line-height:1;">✕</button>
+
+    <!-- SIGN IN VIEW -->
+    <div id="modal-signin-view">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;margin-bottom:4px;">Welcome Back</div>
+      <div style="font-size:13px;color:#aaa;margin-bottom:28px;">Sign in to your Cinema Nest account</div>
+
+      <div id="signin-error" style="display:none;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.35);color:#ff6b6b;font-size:13px;padding:12px 16px;border-radius:6px;margin-bottom:16px;line-height:1.5;"></div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#aaa;margin-bottom:8px;">Email Address</label>
+        <input type="email" id="signin-email" placeholder="you@example.com"
+          style="width:100%;background:#1e1e1e;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;font-family:inherit;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box;"
+          onfocus="this.style.borderColor='#e50914'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#aaa;margin-bottom:8px;">Password</label>
+        <div style="position:relative;">
+          <input type="password" id="signin-password" placeholder="Your password"
+            style="width:100%;background:#1e1e1e;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;font-family:inherit;font-size:14px;padding:12px 14px;padding-right:44px;outline:none;box-sizing:border-box;"
+            onfocus="this.style.borderColor='#e50914'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+            onkeydown="if(event.key==='Enter')handleSignIn()">
+          <button type="button" onclick="toggleSignInPw()" tabindex="-1"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#aaa;cursor:pointer;padding:0;display:flex;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <div style="text-align:right;margin-top:8px;">
+          <a href="#" onclick="showForgotView();return false;" style="font-size:12px;color:#aaa;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#e50914'" onmouseout="this.style.color='#aaa'">Forgot password?</a>
+        </div>
+      </div>
+
+      <button id="signin-btn" onclick="handleSignIn()"
+        style="width:100%;background:#e50914;color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s;">
+        Sign In
+      </button>
+
+      <div style="text-align:center;margin-top:20px;font-size:13px;color:#aaa;">
+        Don't have an account? <a href="#" onclick="closeSignIn();return false;" style="color:#e50914;text-decoration:none;font-weight:600;">Start Free Trial</a>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD VIEW -->
+    <div id="modal-forgot-view" style="display:none;">
+      <button onclick="showSignInView()" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;margin-bottom:24px;padding:0;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Sign In
+      </button>
+
+      <div id="forgot-icon" style="width:52px;height:52px;border-radius:14px;background:rgba(229,9,20,.12);border:1px solid rgba(229,9,20,.25);display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e50914" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+      </div>
+
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;margin-bottom:6px;">Reset Password</div>
+      <div id="forgot-subtitle" style="font-size:13px;color:#aaa;margin-bottom:24px;line-height:1.6;">Enter your email address and we'll send you a link to reset your password.</div>
+
+      <div id="forgot-error" style="display:none;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.35);color:#ff6b6b;font-size:13px;padding:12px 16px;border-radius:6px;margin-bottom:16px;line-height:1.5;"></div>
+      <div id="forgot-success" style="display:none;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);color:#4ade80;font-size:13px;padding:16px;border-radius:6px;margin-bottom:20px;line-height:1.6;"></div>
+
+      <div id="forgot-form-fields">
+        <div style="margin-bottom:20px;">
+          <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#aaa;margin-bottom:8px;">Email Address</label>
+          <input type="email" id="forgot-email" placeholder="you@example.com"
+            style="width:100%;background:#1e1e1e;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;font-family:inherit;font-size:14px;padding:12px 14px;outline:none;box-sizing:border-box;"
+            onfocus="this.style.borderColor='#e50914'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"
+            onkeydown="if(event.key==='Enter')handleForgotPassword()">
+        </div>
+
+        <button id="forgot-btn" onclick="handleForgotPassword()"
+          style="width:100%;background:#e50914;color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s;">
+          Send Reset Link
+        </button>
+      </div>
+
+      <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.06);">
+        <div style="font-size:12px;color:#aaa;line-height:1.7;">
+          <strong style="color:#fff;display:block;margin-bottom:4px;">Didn't receive the email?</strong>
+          Check your spam or junk folder · Make sure the address matches your account · 
+          <a href="#" onclick="handleForgotPassword();return false;" style="color:#e50914;text-decoration:none;">Resend link</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, updateProfile, signInWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── Firebase config ──
+  const firebaseConfig = {
+    apiKey: "AIzaSyARv0yl2troYUULCo-7avpF4yg5nZ-xoEE",
+    authDomain: "cinema-nest-2bf23.firebaseapp.com",
+    projectId: "cinema-nest-2bf23",
+    storageBucket: "cinema-nest-2bf23.firebasestorage.app",
+    messagingSenderId: "912475832817",
+    appId: "1:912475832817:web:7d0de62cac82a04c4e8450"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  // Persist session across page reloads
+  setPersistence(auth, browserLocalPersistence).catch(() => {});
+
+  // ── Helpers ──
+  function togglePw() {
+    const input = document.getElementById('password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  function validate() {
+    let ok = true;
+    const fields = [
+      { id: 'fname',    errId: 'fname-err',  check: v => v.trim().length > 1 },
+      { id: 'email',    errId: 'email-err',  check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+      { id: 'phone',    errId: 'phone-err',  check: v => v.replace(/\s/g,'').length >= 9 },
+      { id: 'password', errId: 'pw-err',     check: v => v.length >= 8 },
+    ];
+    fields.forEach(f => {
+      const input = document.getElementById(f.id);
+      const err   = document.getElementById(f.errId);
+      const valid = f.check(input.value);
+      input.classList.toggle('error', !valid);
+      err.classList.toggle('show', !valid);
+      if (!valid) ok = false;
+    });
+    if (!document.getElementById('terms').checked) {
+      alert('Please agree to the Terms of Service to continue.');
+      ok = false;
+    }
+    return ok;
+  }
+
+  function showFirebaseError(err) {
+    const map = {
+      'auth/email-already-in-use': 'An account with this email already exists. <a href="#">Sign in instead</a>.',
+      'auth/invalid-email':        'That email address doesn\'t look right.',
+      'auth/weak-password':        'Password is too weak — please use at least 8 characters.',
+      'auth/network-request-failed': 'Network error. Check your connection and try again.',
+    };
+    const msg = map[err.code] || `Something went wrong (${err.code}). Please try again.`;
+    const errBox = document.getElementById('firebase-error');
+    errBox.innerHTML = msg;
+    errBox.style.display = 'block';
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="none">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+      Start My 7-Day Free Trial`;
+  }
+
+  function showSuccess(name, trialEnd) {
+    document.getElementById('step1').classList.add('done');
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('done');
+    document.getElementById('step3').classList.add('active');
+
+    document.getElementById('signup-form').style.display = 'none';
+    const s = document.getElementById('success-screen');
+    s.style.display = 'block';
+
+    document.getElementById('success-msg').textContent =
+      `Hey ${name}! Your 7-day free trial has started. Enjoy unlimited streaming — no payment needed until your trial ends.`;
+
+    const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('trial-end-date').textContent =
+      'Ends ' + trialEnd.toLocaleDateString('en-KE', opts);
+
+    setTimeout(() => {
+      document.getElementById('trial-bar').style.width = '100%';
+    }, 300);
+  }
+
+  async function handleSignup() {
+    if (!validate()) return;
+
+    // Hide any previous error
+    const errBox = document.getElementById('firebase-error');
+    errBox.style.display = 'none';
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg>
+      Creating your account...`;
+
+    const fname = document.getElementById('fname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      // 1. Create user in Firebase Auth
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+
+      // 2. Set display name
+      await updateProfile(user, { displayName: `${fname} ` });
+
+      // 3. Save profile + trial info to Firestore
+      const trialStart = new Date();
+      const trialEnd   = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+      await setDoc(doc(db, 'users', user.uid), {
+        firstName:  fname,
+        email:      email,
+        phone:      phone,
+        plan:       'trial',
+        trialStart: serverTimestamp(),
+        trialEnd:   trialEnd.toISOString(),
+        createdAt:  serverTimestamp(),
+      });
+
+      // 4. Also keep a local copy for quick UI reads
+      localStorage.setItem('cinemanest-trial', JSON.stringify({
+        name: fname, email, phone,
+        start: trialStart.toISOString(),
+        end:   trialEnd.toISOString(),
+      }));
+
+      showSuccess(fname, trialEnd);
+
+    } catch (err) {
+      console.error('Signup error:', err);
+      showFirebaseError(err);
+    }
+  }
+
+  // ── Sign-In Modal ──
+  function openSignIn() {
+    const overlay = document.getElementById('signin-overlay');
+    overlay.style.display = 'flex';
+    document.getElementById('signin-error').style.display = 'none';
+    document.getElementById('signin-email').value = '';
+    document.getElementById('signin-password').value = '';
+    setTimeout(() => document.getElementById('signin-email').focus(), 100);
+  }
+
+  function closeSignIn() {
+    document.getElementById('signin-overlay').style.display = 'none';
+  }
+
+  // Close modal on overlay click
+  document.getElementById('signin-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('signin-overlay')) closeSignIn();
+  });
+
+  function toggleSignInPw() {
+    const input = document.getElementById('signin-password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  function showSignInError(err) {
+    const map = {
+      'auth/user-not-found':       'No account found with this email.',
+      'auth/wrong-password':       'Incorrect password. Please try again.',
+      'auth/invalid-credential':   'Incorrect email or password. Please try again.',
+      'auth/invalid-email':        'That email address doesn\'t look right.',
+      'auth/too-many-requests':    'Too many failed attempts. Please wait a moment before trying again.',
+      'auth/network-request-failed': 'Network error. Check your connection and try again.',
+    };
+    const msg = map[err.code] || `Sign-in failed (${err.code}). Please try again.`;
+    const errBox = document.getElementById('signin-error');
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+    const btn = document.getElementById('signin-btn');
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+
+  async function handleSignIn() {
+    const email    = document.getElementById('signin-email').value.trim();
+    const password = document.getElementById('signin-password').value;
+    const errBox   = document.getElementById('signin-error');
+    errBox.style.display = 'none';
+
+    if (!email || !password) {
+      errBox.textContent = 'Please enter your email and password.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('signin-btn');
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg> Signing in...`;
+
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+
+      // ── Check for pending activation (payment arrived before sign-in) ──
+      await applyPendingActivation(user);
+
+      // Check for redirect param (coming from play button)
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('redirect') === 'watch') {
+        window.location.href = `watch.html?id=${params.get('id')}&type=${params.get('type')}`;
+      } else {
+        window.location.href = 'index.html';
+      }
+    } catch (err) {
+      console.error('Sign-in error:', err);
+      showSignInError(err);
+    }
+  }
+
+  // ── Check if a pending activation exists for this user's email ──
+  // This handles the case where Selar webhook fired before the user
+  // had a Cinema Nest account (email didn't match any user doc).
+  async function applyPendingActivation(user) {
+    try {
+      const emailKey = user.email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const pendingRef = doc(db, 'pending_activations', emailKey);
+      const pendingSnap = await getDoc(pendingRef);
+
+      if (pendingSnap.exists()) {
+        const { subscriptionEnd, planDuration } = pendingSnap.data();
+        // Apply it to the user's doc
+        await updateDoc(doc(db, 'users', user.uid), {
+          plan: 'active',
+          planDuration: planDuration || null,
+          subscriptionEnd,
+          activatedAt: new Date().toISOString(),
+        });
+        // Set local flags and clean up pending record
+        localStorage.setItem('cinemanest-paid', 'true');
+        localStorage.setItem('cinemanest-sub', JSON.stringify({ end: subscriptionEnd }));
+        await deleteDoc(pendingRef);
+        console.log('✅ Pending activation applied for', user.email);
+      }
+    } catch (err) {
+      console.warn('Pending activation check failed:', err);
+    }
+  }
+
+  function showForgotView() {
+    document.getElementById('modal-signin-view').style.display = 'none';
+    document.getElementById('modal-forgot-view').style.display = 'block';
+    document.getElementById('forgot-error').style.display = 'none';
+    document.getElementById('forgot-success').style.display = 'none';
+    document.getElementById('forgot-form-fields').style.display = 'block';
+    // Pre-fill email if already typed
+    const signinEmail = document.getElementById('signin-email').value.trim();
+    if (signinEmail) document.getElementById('forgot-email').value = signinEmail;
+    setTimeout(() => document.getElementById('forgot-email').focus(), 100);
+  }
+
+  function showSignInView() {
+    document.getElementById('modal-forgot-view').style.display = 'none';
+    document.getElementById('modal-signin-view').style.display = 'block';
+  }
+
+  async function handleForgotPassword() {
+    const email   = document.getElementById('forgot-email').value.trim();
+    const errBox  = document.getElementById('forgot-error');
+    const sucBox  = document.getElementById('forgot-success');
+    const btn     = document.getElementById('forgot-btn');
+    errBox.style.display = 'none';
+    sucBox.style.display = 'none';
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errBox.textContent = 'Please enter a valid email address.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg> Sending...`;
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      // Show success state
+      sucBox.innerHTML = `
+        <strong style="display:block;margin-bottom:6px;">Reset link sent! 🎉</strong>
+        We've sent a password reset link to <strong>${email}</strong>.<br>
+        Check your inbox (and spam folder) — the link expires in 1 hour.`;
+      sucBox.style.display = 'block';
+      // Hide the form, show only the resend tip
+      document.getElementById('forgot-form-fields').style.display = 'none';
+    } catch (err) {
+      const map = {
+        'auth/user-not-found':    'No account found with this email address.',
+        'auth/invalid-email':     'That doesn\'t look like a valid email address.',
+        'auth/too-many-requests': 'Too many attempts. Please wait a few minutes before trying again.',
+      };
+      errBox.textContent = map[err.code] || 'Could not send reset email. Please try again.';
+      errBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send Reset Link';
+    }
+  }
+
+  // ── Check for redirect on page load (came from play button) ──
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('redirect') === 'watch') {
+      // Auto-open sign-in modal with a note
+      openSignIn();
+      const errBox = document.getElementById('signin-error');
+      errBox.style.color = '#facc15';
+      errBox.textContent = 'Sign in or create a free account to start watching.';
+      errBox.style.display = 'block';
+    }
+
+    // Existing trial check
+    const saved = localStorage.getItem('cinemanest-trial');
+    if (saved) {
+      const trial  = JSON.parse(saved);
+      const msLeft = new Date(trial.end) - new Date();
+      if (msLeft > 0) {
+        const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+        const sub = document.getElementById('signup-form')?.querySelector('.form-sub');
+        if (sub) sub.textContent = `You already have an active trial with ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining!`;
+      }
+    }
+  });
+
+  // Expose to inline handlers
+  window.togglePw        = togglePw;
+  window.handleSignup    = handleSignup;
+  window.openSignIn      = openSignIn;
+  window.closeSignIn     = closeSignIn;
+  window.toggleSignInPw  = toggleSignInPw;
+  window.handleSignIn    = handleSignIn;
+  window.showForgotView  = showForgotView;
+  window.showSignInView  = showSignInView;
+  window.handleForgotPassword = handleForgotPassword;
+</script>
+
+<!-- FOOTER -->
+<footer style="border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <p style="font-size:12px;color:rgba(255,255,255,.28);line-height:1.6;max-width:600px;">
+    This site does not store any files on our server. We only link to media which is hosted on third-party services.
+  </p>
+  <a href="mailto:contact@cinemanest" style="font-size:12px;color:rgba(255,255,255,.35);text-decoration:none;white-space:nowrap;transition:color .2s;" onmouseover="this.style.color='#e50914'" onmouseout="this.style.color='rgba(255,255,255,.35)'">contact@cinemanest</a>
+</footer>
+
+</body>
+</html>
