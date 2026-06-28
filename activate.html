@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activating Your Account — Cinema Nest</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #e50914;
+  --red-dark: #b0060f;
+  --bg: #080808;
+  --surface: #141414;
+  --surface2: #1e1e1e;
+  --text: #fff;
+  --muted: #aaa;
+  --green: #4ade80;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Josefin Sans', sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+
+/* NAV */
+.logo {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding: 16px 40px;
+  background: rgba(8,8,8,.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 28px; color: var(--red); letter-spacing: 2px;
+  text-decoration: none; display: block;
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 48px 40px;
+  width: 100%; max-width: 440px;
+  text-align: center;
+  margin-top: 60px;
+}
+
+/* STATES */
+.icon { font-size: 52px; margin-bottom: 20px; line-height: 1; }
+
+.card h1 {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 34px; letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.card p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+
+/* SPINNER */
+.spinner {
+  width: 48px; height: 48px;
+  border: 3px solid rgba(255,255,255,.1);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* SUCCESS */
+.success-ring {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(74,222,128,.15);
+  border: 2px solid var(--green);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.success-ring svg { width: 28px; height: 28px; stroke: var(--green); fill: none; stroke-width: 3; }
+
+/* INPUTS */
+.input-group { margin-bottom: 14px; text-align: left; }
+.input-group label { font-size: 12px; color: var(--muted); font-weight: 500; display: block; margin-bottom: 6px; letter-spacing: .5px; text-transform: uppercase; }
+.input-group input {
+  width: 100%; background: var(--surface2);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px; padding: 12px 14px;
+  color: var(--text); font-family: inherit; font-size: 14px;
+  outline: none; transition: border-color .2s;
+}
+.input-group input:focus { border-color: var(--red); }
+
+/* BUTTONS */
+.btn {
+  width: 100%; padding: 14px;
+  border-radius: 8px; border: none;
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: background .2s, transform .15s;
+  margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn:active { transform: scale(.98); }
+.btn-primary { background: var(--red); color: #fff; }
+.btn-primary:hover { background: var(--red-dark); }
+.btn-secondary {
+  background: transparent; color: var(--muted);
+  border: 1px solid rgba(255,255,255,.1); font-size: 13px;
+}
+.btn-secondary:hover { color: var(--text); border-color: rgba(255,255,255,.3); }
+
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 0; color: rgba(255,255,255,.2); font-size: 12px;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08);
+}
+
+/* ERROR */
+.error-box {
+  background: rgba(255,68,68,.1); border: 1px solid rgba(255,68,68,.3);
+  color: #ff6b6b; font-size: 13px; padding: 12px 14px;
+  border-radius: 8px; margin-bottom: 16px; line-height: 1.5;
+  display: none; text-align: left;
+}
+
+/* TOGGLE LINK */
+.toggle-link {
+  font-size: 13px; color: var(--muted); margin-top: 6px;
+}
+.toggle-link a { color: var(--red); text-decoration: none; cursor: pointer; }
+.toggle-link a:hover { text-decoration: underline; }
+
+/* PLAN PILL */
+.plan-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.25);
+  color: var(--green); font-size: 12px; font-weight: 600;
+  padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
+  letter-spacing: .5px;
+}
+.plan-pill span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+@media (max-width: 480px) {
+  .card { padding: 36px 24px; }
+  .logo { padding: 14px 20px; }
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="logo">Cinema Nest</a>
+
+<div class="card" id="card">
+
+  <!-- STATE: CHECKING (initial) -->
+  <div id="state-checking">
+    <div class="spinner"></div>
+    <h1>Verifying Payment</h1>
+    <p>Please wait while we confirm your subscription...</p>
+  </div>
+
+  <!-- STATE: ACTIVATING (logged in, writing to Firestore) -->
+  <div id="state-activating" style="display:none">
+    <div class="spinner"></div>
+    <h1>Activating Account</h1>
+    <p>Unlocking your Cinema Nest subscription...</p>
+  </div>
+
+  <!-- STATE: SUCCESS -->
+  <div id="state-success" style="display:none">
+    <div class="success-ring">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="plan-pill"><span></span> <span id="plan-pill-label">1 Month Active</span></div>
+    <h1>You're All Set!</h1>
+    <p>Your Cinema Nest subscription is now active. Start watching unlimited movies and shows.</p>
+    <button class="btn btn-primary" onclick="window.location.href='index.html'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
+      Start Watching
+    </button>
+  </div>
+
+  <!-- STATE: SIGN IN (not logged in) -->
+  <div id="state-signin" style="display:none">
+    <div class="icon">🎬</div>
+    <h1>Sign In to Activate</h1>
+    <p>Your payment was received! Sign in to your Cinema Nest account to activate your <strong id="signin-plan-name">1 Month</strong> subscription.</p>
+
+    <div class="error-box" id="signin-error"></div>
+
+    <div class="input-group">
+      <label>Email</label>
+      <input type="email" id="signin-email" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="signin-password" placeholder="Your password" autocomplete="current-password">
+    </div>
+
+    <button class="btn btn-primary" id="signin-btn" onclick="handleSignIn()">Sign In & Activate</button>
+
+    <div class="divider">or</div>
+
+    <p class="toggle-link">No account yet? <a onclick="showSignup()">Create one free →</a></p>
+  </div>
+
+  <!-- STATE: SIGN UP (new user) -->
+  <div id="state-signup" style="display:none">
+    <div class="icon">🎬</div>
+    <h1>Create Account</h1>
+    <p>Almost there! Create your free Cinema Nest account to activate your <strong id="signup-plan-name">1 Month</strong> subscription.</p>
+
+    <div class="error-box" id="signup-error"></div>
+
+    <div class="input-group">
+      <label>First Name</label>
+      <input type="text" id="signup-name" placeholder="Your name" autocomplete="given-name">
+    </div>
+    <div class="input-group">
+      <label>Email</label>
+      <input type="email" id="signup-email" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="signup-password" placeholder="Min. 8 characters" autocomplete="new-password">
+    </div>
+
+    <button class="btn btn-primary" id="signup-btn" onclick="handleSignUp()">Create Account & Activate</button>
+
+    <div class="divider">or</div>
+
+    <p class="toggle-link">Already have an account? <a onclick="showSignin()">Sign in →</a></p>
+  </div>
+
+  <!-- STATE: ERROR -->
+  <div id="state-error" style="display:none">
+    <div class="icon">⚠️</div>
+    <h1>Something Went Wrong</h1>
+    <p id="error-msg">We couldn't activate your account. Please contact support at <a href="mailto:contact@cinemanest" style="color:var(--red)">contact@cinemanest</a>.</p>
+    <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Back to Home</button>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp }                                    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, setPersistence, browserLocalPersistence }
+                                                              from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, serverTimestamp }
+                                                              from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyARv0yl2troYUULCo-7avpF4yg5nZ-xoEE",
+    authDomain:        "cinema-nest-2bf23.firebaseapp.com",
+    projectId:         "cinema-nest-2bf23",
+    storageBucket:     "cinema-nest-2bf23.firebasestorage.app",
+    messagingSenderId: "912475832817",
+    appId:             "1:912475832817:web:7d0de62cac82a04c4e8450",
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  setPersistence(auth, browserLocalPersistence).catch(() => {});
+
+  // Wait for Firebase Auth to fully restore the session, then force a token
+  // refresh. Without this, onAuthStateChanged can fire before the ID token
+  // is ready, causing Firestore to see an unauthenticated request.
+  function waitForAuth() {
+    return new Promise((resolve) => {
+      const unsub = onAuthStateChanged(auth, (user) => {
+        unsub();
+        if (!user) { resolve(null); return; }
+        user.getIdToken(true).then(() => resolve(user)).catch(() => resolve(user));
+      });
+    });
+  }
+
+  // ── Detect which plan was purchased ──
+  // Selar redirects here using the "Redirect URL" configured per-product.
+  // Set each product's redirect URL to:
+  //   1 month  → https://yourdomain.com/activate.html?plan=1m
+  //   3 months → https://yourdomain.com/activate.html?plan=3m
+  //   6 months → https://yourdomain.com/activate.html?plan=6m
+  //   12 months→ https://yourdomain.com/activate.html?plan=12m
+  // Fallback: the plan the user picked on pricing.html, saved just before
+  // they were sent to Selar (covers the case where the redirect URL
+  // doesn't carry a plan param). Defaults to 1 month if neither is present.
+  const PLAN_DAYS = { '1m': 30, '3m': 90, '6m': 180, '12m': 365 };
+  const PLAN_NAMES = { '1m': '1 Month', '3m': '3 Months', '6m': '6 Months', '12m': '12 Months' };
+
+  function detectPlan() {
+    const params   = new URLSearchParams(window.location.search);
+    const fromUrl   = params.get('plan');
+    if (fromUrl && PLAN_DAYS[fromUrl]) return fromUrl;
+    try {
+      const fromStorage = localStorage.getItem('cinemanest-pending-plan');
+      if (fromStorage && PLAN_DAYS[fromStorage]) return fromStorage;
+    } catch {}
+    return '1m'; // safe default
+  }
+
+  const selectedPlan = detectPlan();
+  const planDays     = PLAN_DAYS[selectedPlan];
+  const planName     = PLAN_NAMES[selectedPlan];
+
+  // Reflect the detected plan in the UI right away (script runs at end of
+  // body, so the DOM is already there — no need to wait for an event)
+  document.querySelectorAll('#signin-plan-name, #signup-plan-name').forEach(el => {
+    if (el) el.textContent = planName;
+  });
+
+  // ── Calculate subscription end based on the purchased plan ──
+  function getSubscriptionEnd() {
+    const d = new Date();
+    d.setDate(d.getDate() + planDays);
+    return d.toISOString();
+  }
+
+  // ── Write active subscription to Firestore ──
+  async function activateSubscription(user) {
+    showState('activating');
+    const subscriptionEnd = getSubscriptionEnd();
+    try {
+      const userRef = doc(db, 'users', user.uid);
+
+      // setDoc with merge:true works whether the doc exists or not —
+      // it creates it if missing or updates only the listed fields if present.
+      // This replaces the old getDoc → branch pattern which failed when the
+      // Firestore user doc didn't exist yet (updateDoc throws on missing docs).
+      await setDoc(userRef, {
+        email:           user.email,
+        plan:            'active',
+        planDuration:    selectedPlan,
+        subscriptionEnd: subscriptionEnd,
+        activatedAt:     new Date().toISOString(),
+        createdAt:       serverTimestamp(),   // only written on first create; merge ignores if already set
+      }, { merge: true });
+
+      // Flag locally so browse/watch pages skip Firestore re-check
+      localStorage.setItem('cinemanest-paid', 'true');
+      localStorage.setItem('cinemanest-sub', JSON.stringify({ end: subscriptionEnd }));
+      try { localStorage.removeItem('cinemanest-pending-plan'); } catch {}
+      document.getElementById('plan-pill-label').textContent = `${planName} Active`;
+      showState('success');
+
+    } catch (err) {
+      console.error('Activation error:', err.code, err.message);
+      // Show a more specific message for permission errors
+      if (err.code === 'permission-denied') {
+        showError('Permission denied writing to your account. Please sign out, sign back in, and try again.');
+      } else {
+        showError('Activation failed (' + (err.code || err.message) + '). Please contact support.');
+      }
+    }
+  }
+
+  // ── Check auth state on load ──
+  // Use waitForAuth() which forces a token refresh before we attempt any
+  // Firestore write — this prevents the permission-denied error caused by
+  // the auth session not being fully ready when onAuthStateChanged first fires.
+  waitForAuth().then(async (user) => {
+    if (user) {
+      await activateSubscription(user);
+    } else {
+      showState('signin');
+    }
+  });
+
+  // ── Sign In then activate ──
+  window.handleSignIn = async function() {
+    const email    = document.getElementById('signin-email').value.trim();
+    const password = document.getElementById('signin-password').value;
+    const errBox   = document.getElementById('signin-error');
+    const btn      = document.getElementById('signin-btn');
+
+    errBox.style.display = 'none';
+    if (!email || !password) { showFieldError(errBox, 'Please fill in all fields.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      await activateSubscription(user);
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Sign In & Activate';
+      const msgs = {
+        'auth/user-not-found':    'No account found with this email.',
+        'auth/wrong-password':    'Incorrect password. Please try again.',
+        'auth/invalid-credential':'Incorrect email or password.',
+        'auth/invalid-email':     'Please enter a valid email address.',
+        'auth/too-many-requests': 'Too many attempts. Please wait a moment.',
+      };
+      showFieldError(errBox, msgs[err.code] || 'Sign in failed. Please try again.');
+    }
+  };
+
+  // ── Sign Up then activate ──
+  window.handleSignUp = async function() {
+    const name     = document.getElementById('signup-name').value.trim();
+    const email    = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const errBox   = document.getElementById('signup-error');
+    const btn      = document.getElementById('signup-btn');
+
+    errBox.style.display = 'none';
+    if (!name || !email || !password) { showFieldError(errBox, 'Please fill in all fields.'); return; }
+    if (password.length < 8)          { showFieldError(errBox, 'Password must be at least 8 characters.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try {
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(user, { displayName: name });
+      await activateSubscription(user);
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Create Account & Activate';
+      const msgs = {
+        'auth/email-already-in-use': 'An account with this email already exists. Sign in instead.',
+        'auth/invalid-email':        'Please enter a valid email address.',
+        'auth/weak-password':        'Password is too weak — use at least 8 characters.',
+      };
+      showFieldError(errBox, msgs[err.code] || 'Sign up failed. Please try again.');
+    }
+  };
+
+  // ── UI helpers ──
+  function showState(state) {
+    ['checking','activating','success','signin','signup','error'].forEach(s => {
+      document.getElementById('state-' + s).style.display = s === state ? 'block' : 'none';
+    });
+  }
+
+  function showFieldError(box, msg) {
+    box.textContent = msg;
+    box.style.display = 'block';
+  }
+
+  function showError(msg) {
+    document.getElementById('error-msg').textContent = msg;
+    showState('error');
+  }
+
+  // Expose toggle functions to global scope
+  window.showSignup = () => showState('signup');
+  window.showSignin = () => showState('signin');
+
+  // Enter key support
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const activeState = ['signin','signup'].find(s =>
+      document.getElementById('state-' + s).style.display !== 'none'
+    );
+    if (activeState === 'signin') window.handleSignIn();
+    if (activeState === 'signup') window.handleSignUp();
+  });
+</script>
+</body>
+</html>
